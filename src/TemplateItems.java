@@ -1,20 +1,7 @@
-/*
- * @(#) TemplateItems.java   1.0   Nov 12, 2021
- *
- * Sindiso Mkhatshwa (mkhsin035@myuct.ac.za)
- *
- * Nitschke Laboratory, UCT
- *
- * @(#) $Id$
- */
-
+import models.Part;
 import za.co.mahlaza.research.grammarengine.base.models.interfaces.InternalSlotRootAffix;
-import za.co.mahlaza.research.grammarengine.base.models.template.Phrase;
-import za.co.mahlaza.research.grammarengine.base.models.template.PolymorphicWord;
-import za.co.mahlaza.research.grammarengine.base.models.template.Punctuation;
-import za.co.mahlaza.research.grammarengine.base.models.template.Slot;
-import za.co.mahlaza.research.grammarengine.base.models.template.TemplatePortion;
-import za.co.mahlaza.research.grammarengine.base.models.template.UnimorphicWord;
+import za.co.mahlaza.research.grammarengine.base.models.template.*;
+import za.co.mahlaza.research.templateparsing.TemplateWriter;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -30,6 +17,14 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -96,19 +91,8 @@ public class TemplateItems {
         pnlItems.setAlignmentX(Component.CENTER_ALIGNMENT);
         pnlItems.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
 
-        //ArrayList<TemplatePart> templateItems = new ArrayList<>();
 
-        /**templateItems.add(new Slot("slot1", "s1", "concord1"));
-        templateItems.add(new Concord("concord1", "c1", "subjectVerb", "root1"));
-        templateItems.add(new Root("root1", "nke"));*/
-
-        //pnlItems.add(setupTemplateItems(ToCTeditor.dataModel.getData()));
-        if (ToCTeditor.DEBUG){
-            pnlItems.add(setupTemplatePortions(ToCTeditor.dataModel.getTemplatePortions()));
-        }
-        else{
-            pnlItems.add(setupTemplateItems(ToCTeditor.dataModel.getData()));
-        }
+        pnlItems.add(setupTemplatePortions(frame.currTemplate.getTemplatePortions()));
 
 
         /**
@@ -137,21 +121,13 @@ public class TemplateItems {
         /**pnlToggleButton.add(Box.createRigidArea(new Dimension(10,0)));
         pnlToggleButton.add(btnSaveTemplate);*/
 
-        ItemListener itemListener = new ItemListener() {
-            public void itemStateChanged(ItemEvent itemEvent) {
-                int state = itemEvent.getStateChange();
-                //if (state == ItemEvent.SELECTED) {
-                    ToCTeditor.gui = new ViewThread();
-                    ToCTeditor.gui.setToggleBtnState(state);
-                    ToCTeditor.gui.start();
-                System.out.println("State: " + state);
-                /**} else {
-                    ToCTeditor.gui.setToggleBtnState(state);
-                    //System.out.println("Deselected: " + state);
-                }*/
-            }
+        ItemListener itemListener = itemEvent -> {
+            int state = itemEvent.getStateChange();
+            ToCTeditor.gui = new ViewThread();
+            ToCTeditor.gui.setToggleBtnState(state);
+            ToCTeditor.gui.start();
+            System.out.println("State (2): " + state);
         };
-
         tbtnTurtle.addItemListener(itemListener);
 
         /**
@@ -364,10 +340,7 @@ public class TemplateItems {
             pnlEditorTurtleTitle.remove(i);
         }
 
-        if (ToCTeditor.gui.getToggleBtnState() == 1){
-
-
-
+        if (ToCTeditor.gui.getToggleBtnState() == 1) {
             /**
              * Add title labels to labels panel
              */
@@ -452,15 +425,15 @@ public class TemplateItems {
             }
 
 
-            /**if (type.getText().equals("Polymorphic word")){
-                List<InternalSlotRootAffix> morphemes = ((PolymorphicWord)part).getAllMorphemes();
-                //System.out.println("Polymophic type: " + ((PolymorphicWord)part).getIdentification() + "Affix boxes: " + morphemes.size());
-                for (InternalSlotRootAffix affix : morphemes) {
-                    JLabel morphemeName = new JLabel(ToCTeditor.turtleGen.getMorphemeId(affix));
-                    JLabel morphemeType = new JLabel(ToCTeditor.turtleGen.getMorphemeType(affix));
-                    box.add(createItemComponent(morphemeName, morphemeType));
-                }
-            }*/
+//            if (type.getText().equals("Polymorphic word")){
+//                List<InternalSlotRootAffix> morphemes = ((PolymorphicWord)part).getAllMorphemes();
+//                //System.out.println("Polymophic type: " + ((PolymorphicWord)part).getIdentification() + "Affix boxes: " + morphemes.size());
+//                for (InternalSlotRootAffix affix : morphemes) {
+//                    JLabel morphemeName = new JLabel(ToCTeditor.turtleGen.getMorphemeId(affix));
+//                    JLabel morphemeType = new JLabel(ToCTeditor.turtleGen.getMorphemeType(affix));
+//                    box.add(createItemComponent(morphemeName, morphemeType));
+//                }
+//            }
         }
         JPanel p = new JPanel();
         p.setMaximumSize(new Dimension(700, 145));
@@ -482,9 +455,10 @@ public class TemplateItems {
         box.addMouseMotionListener(dh);
 
         for (TemplatePortion templatePortion : list) {
-            String type = ToCTeditor.turtleGen.getPartType(templatePortion);
+            String type = templatePortion.getClass().getSimpleName();
+            System.out.println("Setting up = "+type);
 
-            if ( type.equals("Polymorphic word") && ((PolymorphicWord)templatePortion).getAllMorphemes().size() > 0){
+            if ( type.equals("PolymorphicWord") && ((PolymorphicWord)templatePortion).getAllMorphemes().size() > 0){
                 box.add(createPortionComponent(templatePortion, type));
             }
             else{
@@ -502,7 +476,6 @@ public class TemplateItems {
     }
 
     private JPanel createPortionComponent(TemplatePortion templatePortion, String type) {
-
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setBackground(Color.white);
@@ -573,7 +546,7 @@ public class TemplateItems {
         List<InternalSlotRootAffix> morphemesList = ((PolymorphicWord)templatePortion).getAllMorphemes();
         for (int i = 0; i < morphemesList.size(); i++){
             JLabel mName = new JLabel(morphemesList.get(i).getSerialisedName());
-            JLabel mType = new JLabel(ToCTeditor.turtleGen.getMorphemeType(morphemesList.get(i)));
+            JLabel mType = new JLabel(morphemesList.get(i).getType());
             maxWidth += 116;
             pnlMorphemes.add(createItemComponent(mName, mType, true));
         }
@@ -643,7 +616,7 @@ public class TemplateItems {
          * Reason why found here (last answer is the only one that works with a Makefile):
          * https://stackoverflow.com/questions/13151979/null-pointer-exception-when-an-imageicon-is-added-to-jbutton-in-netbeans
          */
-        button.setIcon(createImageIcon("/images/kebab.png"));
+        button.setIcon(createImageIcon("/images/kebab.png")); //TODO: move images outside of src
         button.setBorderPainted(false);
         button.setBackground(Color.white);
         button.setMinimumSize(new Dimension(35,8));
@@ -863,46 +836,49 @@ public class TemplateItems {
     }
 
     public JPanel getPartPanelEditor(TemplatePortion currentTemplatePortion) {
-        
-        String type = ToCTeditor.turtleGen.getPartType(currentTemplatePortion);
-        JPanel currentPanel;
-
-        if (type.equals("Slot")){
-            Slot part = (Slot)currentTemplatePortion;
-            currentPanel = setupSlotEditor(part);
+        System.out.println("getPartPanelEditor - currentTemplatePortion - "+currentTemplatePortion);
+        JPanel currentPanel = null;
+        if (currentTemplatePortion != null) {
+            String type = currentTemplatePortion.getClass().getSimpleName();
+            System.out.println("The type is "+type);
+            if (type.equals("Slot")) {
+                Slot part = (Slot) currentTemplatePortion;
+                currentPanel = setupSlotEditor(part);
+            } else if (type.equals("UnimorphicWord")) {
+                UnimorphicWord part = (UnimorphicWord) currentTemplatePortion;
+                currentPanel = setupUnimorphicWordEditor(part);
+            } else if (type.equals("Punctuation")) {
+                Punctuation part = (Punctuation) currentTemplatePortion;
+                currentPanel = setupPunctuationEditor(part);
+            } else if (type.equals("PolymorphicWord")) {
+                PolymorphicWord part = (PolymorphicWord) currentTemplatePortion;
+                currentPanel = setupPolymorphicWordEditor(part);
+            } else if (type.equals("Phrase")) {
+                Phrase part = (Phrase) currentTemplatePortion;
+                currentPanel = setupPhraseEditor(part);
+            }
+            else{
+                //System.out.println("No current item selected");
+                currentPanel = new JPanel();
+                currentPanel.setBackground(Color.lightGray);
+            }
+            /**else if ( type.equals("Phrase") ){
+             Phrase part = (Phrase)currentTemplatePortion;
+             currentPanel = setupPhraseEditor(part);
+             }
+             else if ( type.equals("Copula") ){
+             Copula part = (Copula)currentPart;
+             currentPanel = setupCopulaEditor(part);
+             }
+             else if ( type.equals("Unimorphic affix")){
+             UnimorphicAffix part = (UnimorphicAffix)currentPart;
+             currentPanel = setupUnimorphicAffixEditor(part);
+             }
+             else if (type.equals("Root")){
+             Root part = (Root)currentPart;
+             currentPanel = setupRootEditor(part);
+             }*/
         }
-        else if (type.equals("Unimorphic word")){
-            UnimorphicWord part = (UnimorphicWord)currentTemplatePortion;
-            currentPanel = setupUnimorphicWordEditor(part);
-        }
-        else if (type.equals("Punctuation")){
-            Punctuation part = (Punctuation)currentTemplatePortion;
-            currentPanel = setupPunctuationEditor(part);
-        }
-        else if (type.equals("Polymorphic word")){
-            PolymorphicWord part = (PolymorphicWord)currentTemplatePortion;
-            currentPanel = setupPolymorphicWordEditor(part);
-        }
-        else if ( type.equals("Phrase") ){
-            Phrase part = (Phrase)currentTemplatePortion;
-            currentPanel = setupPhraseEditor(part);
-        }
-        /**else if ( type.equals("Phrase") ){
-            Phrase part = (Phrase)currentTemplatePortion;
-            currentPanel = setupPhraseEditor(part);
-        }
-        else if ( type.equals("Copula") ){
-            Copula part = (Copula)currentPart;
-            currentPanel = setupCopulaEditor(part);
-        }
-        else if ( type.equals("Unimorphic affix")){
-            UnimorphicAffix part = (UnimorphicAffix)currentPart;
-            currentPanel = setupUnimorphicAffixEditor(part);
-        }
-        else if (type.equals("Root")){
-            Root part = (Root)currentPart;
-            currentPanel = setupRootEditor(part);
-        }*/
         else{
             //System.out.println("No current item selected");
             currentPanel = new JPanel();
@@ -911,54 +887,54 @@ public class TemplateItems {
         return currentPanel;
     }
 
-    public JPanel getPartPanelEditor(Part currentPart/**TemplatePortion currentPart*/) {
-
-        //String type = ToCTeditor.turtleGen.getPartType(currentPart);
-        JPanel currentPanel;
-        //System.out.println("Inside getPanelEditor. Current part type: " + type);
-        if (currentPart != null) {
-
-            if (currentPart.getType().equals("Slot")/**type.equals("Slot")*/) {
-                //Slot part = (Slot)currentPart;
-                currentPanel = setupSlotEditor(currentPart);
-            } else if (currentPart.getType().equals("Unimorphic word")/**type.equals("Unimorphic word")*/) {
-                /**UnimorphicWord part = (UnimorphicWord)currentPart;
-                 currentPanel = setupUnimorphicWordEditor(part);*/
-                currentPanel = setupUnimorphicWordEditor(currentPart);
-            } else if (currentPart.getType().equals("Punctuation")/**type.equals("Punctuation")*/) {
-                /**Punctuation part = (Punctuation)currentPart;
-                 currentPanel = setupPunctuationEditor(part);*/
-                currentPanel = setupPunctuationEditor(currentPart);
-            } else if (currentPart.getType().equals("Polymorphic word")/**type.equals("Polymorphic word")*/) {
-                /**PolymorphicWord part = (PolymorphicWord)currentPart;
-                 currentPanel = setupPolymorphicWordEditor(part);*/
-                currentPanel = setupPolymorphicWordEditor(currentPart);
-            } else if (currentPart.getType().equals("Phrase")/***type.equals("Phrase")*/) {
-                /**Phrase part = (Phrase)currentPart;
-                 currentPanel = setupPhraseEditor(part);*/
-                currentPanel = setupPhraseEditor(currentPart);
-            }
-            else if (currentPart.getType().equals("Concord")) {
-                currentPanel = setupConcordEditor(currentPart);
-            }
-            else if (currentPart.getType().equals("Copula")) {
-                currentPanel = setupCopulaEditor(currentPart);
-            }
-            else if (currentPart.getType().equals("Unimorphic affix")) {
-                currentPanel = setupUnimorphicAffixEditor(currentPart);
-            }
-            else{
-                currentPanel = new JPanel();
-                currentPanel.setBackground(Color.lightGray);
-            }
-        }
-        else{
-            currentPanel = new JPanel();
-            currentPanel.setBackground(Color.lightGray);
-        }
-
-        return currentPanel;
-    }
+//    public JPanel getPartPanelEditor(Part currentPart/**TemplatePortion currentPart*/) {
+//
+//        //String type = ToCTeditor.turtleGen.getPartType(currentPart);
+//        JPanel currentPanel;
+//        //System.out.println("Inside getPanelEditor. Current part type: " + type);
+//        if (currentPart != null) {
+//
+//            if (currentPart.getType().equals("Slot")/**type.equals("Slot")*/) {
+//                //Slot part = (Slot)currentPart;
+//                currentPanel = setupSlotEditor(currentPart);
+//            } else if (currentPart.getType().equals("Unimorphic word")/**type.equals("Unimorphic word")*/) {
+//                /**UnimorphicWord part = (UnimorphicWord)currentPart;
+//                 currentPanel = setupUnimorphicWordEditor(part);*/
+//                currentPanel = setupUnimorphicWordEditor(currentPart);
+//            } else if (currentPart.getType().equals("Punctuation")/**type.equals("Punctuation")*/) {
+//                /**Punctuation part = (Punctuation)currentPart;
+//                 currentPanel = setupPunctuationEditor(part);*/
+//                currentPanel = setupPunctuationEditor(currentPart);
+//            } else if (currentPart.getType().equals("Polymorphic word")/**type.equals("Polymorphic word")*/) {
+//                /**PolymorphicWord part = (PolymorphicWord)currentPart;
+//                 currentPanel = setupPolymorphicWordEditor(part);*/
+//                currentPanel = setupPolymorphicWordEditor(currentPart);
+//            } else if (currentPart.getType().equals("Phrase")/***type.equals("Phrase")*/) {
+//                /**Phrase part = (Phrase)currentPart;
+//                 currentPanel = setupPhraseEditor(part);*/
+//                currentPanel = setupPhraseEditor(currentPart);
+//            }
+//            else if (currentPart.getType().equals("Concord")) {
+//                currentPanel = setupConcordEditor(currentPart);
+//            }
+//            else if (currentPart.getType().equals("Copula")) {
+//                currentPanel = setupCopulaEditor(currentPart);
+//            }
+//            else if (currentPart.getType().equals("Unimorphic affix")) {
+//                currentPanel = setupUnimorphicAffixEditor(currentPart);
+//            }
+//            else{
+//                currentPanel = new JPanel();
+//                currentPanel.setBackground(Color.lightGray);
+//            }
+//        }
+//        else{
+//            currentPanel = new JPanel();
+//            currentPanel.setBackground(Color.lightGray);
+//        }
+//
+//        return currentPanel;
+//    }
 
     /**public JPanel getPartPanelTurtle(TemplatePart currentPart) {
         String type = getPartType(currentPart);
@@ -1025,7 +1001,43 @@ public class TemplateItems {
         return currentPanel;
     }*/
 
-    public JPanel getPartPanelTurtle(/**TemplatePortion currentPart*/Part currentPart) {
+//    public JPanel getPartPanelTurtle(/**TemplatePortion currentPart*/Part currentPart) {
+//        //String type = ToCTeditor.turtleGen.getPartType(currentPart);
+//        JPanel currentPanel = new JPanel();
+//        currentPanel.setLayout(new BoxLayout(currentPanel, BoxLayout.Y_AXIS));
+//        currentPanel.setBackground(Color.lightGray);
+//        currentPanel.setMaximumSize(new Dimension(345, 250));
+//        JTextArea txtArea = new JTextArea();
+//        txtArea.setEditable(false);
+//        txtArea.setMaximumSize(new Dimension(345, 250));
+//        txtArea.setAlignmentX(Component.CENTER_ALIGNMENT);
+//        txtArea.setFont(new Font("Sans", Font.PLAIN, 12));
+//        txtArea.setForeground(Color.blue);
+//        JScrollPane pnlScroll = new JScrollPane(txtArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+//        pnlScroll.setMaximumSize(new Dimension(345, 250));
+//        pnlScroll.setBackground(Color.lightGray);
+//
+//
+//        PrintWriter previewOut = new PrintWriter(new OutputStream() {
+//            @Override
+//            public void write(int b) throws IOException {
+//                String text = ""+(char)(b & 0xFF);
+//                txtArea.append(text);
+//                currentPanel.add(pnlScroll);
+//            }
+//        });
+//        Collection<Template> templates = new LinkedList<>();
+//        templates.add(frame.currTemplate);
+//        String uri = frame.currTemplate.getURI();
+//        try {
+//            TemplateWriter.saveTemplates(templates, uri, previewOut);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return currentPanel;
+//    }
+
+    public JPanel getPartPanelTurtle() {
         //String type = ToCTeditor.turtleGen.getPartType(currentPart);
         JPanel currentPanel = new JPanel();
         currentPanel.setLayout(new BoxLayout(currentPanel, BoxLayout.Y_AXIS));
@@ -1041,41 +1053,35 @@ public class TemplateItems {
         pnlScroll.setMaximumSize(new Dimension(345, 250));
         pnlScroll.setBackground(Color.lightGray);
 
-
-        String turtle = ToCTeditor.turtleGen.getPartTurtle(currentPart);
-        if (turtle.length() > 0 ){
-            txtArea.setText(turtle);
+        PrintWriter previewOut = new PrintWriter(new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+                String text = ""+(char)(b & 0xFF);
+                txtArea.append(text);
                 currentPanel.add(pnlScroll);
-        }
-        return currentPanel;
-    }
-    public JPanel getPartPanelTurtle(TemplatePortion currentTemplatePortion) {
-        //String type = ToCTeditor.turtleGen.getPartType(currentPart);
-        JPanel currentPanel = new JPanel();
-        currentPanel.setLayout(new BoxLayout(currentPanel, BoxLayout.Y_AXIS));
-        currentPanel.setBackground(Color.lightGray);
-        currentPanel.setMaximumSize(new Dimension(345, 250));
-        JTextArea txtArea = new JTextArea();
-        txtArea.setEditable(false);
-        txtArea.setMaximumSize(new Dimension(345, 250));
-        txtArea.setAlignmentX(Component.CENTER_ALIGNMENT);
-        txtArea.setFont(new Font("Sans", Font.PLAIN, 12));
-        txtArea.setForeground(Color.blue);
-        JScrollPane pnlScroll = new JScrollPane(txtArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        pnlScroll.setMaximumSize(new Dimension(345, 250));
-        pnlScroll.setBackground(Color.lightGray);
+            }
+        });
 
-        String turtle;
-        if (currentTemplatePortion != null) {
+        Collection<Template> templates = new LinkedList<>();
+        templates.add(frame.currTemplate);
+        String uri = frame.currTemplate.getURI();
+        try {
+            TemplateWriter.saveTemplates(templates, uri, previewOut);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        //frame.currTemplate
+/*        if (currentTemplatePortion != null) {
             turtle = ToCTeditor.turtleGen.getPartTurtle(currentTemplatePortion);
         }
         else {
             turtle = ToCTeditor.turtleGen.getTemplateTurtle();
-        }
-        if (turtle.length() > 0 ){
+        }*/
+/*        if (turtle.length() > 0 ){
             txtArea.setText(turtle);
             currentPanel.add(pnlScroll);
-        }
+        }*/
         return currentPanel;
     }
 
@@ -1114,7 +1120,125 @@ public class TemplateItems {
         return type;
     }*/
 
-    public JPanel setupSlotEditor(Part part/**Slot part*/){
+//    public JPanel setupSlotEditor(Part part/**Slot part*/) {
+//        /**
+//         * Slot Editor Panel
+//         */
+//        JPanel pnlSlotEditor = new JPanel();
+//        pnlSlotEditor.setLayout(new BoxLayout(pnlSlotEditor, BoxLayout.Y_AXIS));
+//        pnlSlotEditor.setMinimumSize(new Dimension(345,250));
+//        pnlSlotEditor.setMaximumSize(new Dimension(345,250));
+//        pnlSlotEditor.setBackground(Color.lightGray);
+//
+//        /**
+//         * Create part name panel and add components to panel
+//         */
+//        JPanel pnlPartName = new JPanel();
+//        pnlPartName.setLayout(new BoxLayout(pnlPartName, BoxLayout.LINE_AXIS));
+//        pnlPartName.setMaximumSize(new Dimension(340,30));
+//        pnlPartName.setAlignmentX(Component.CENTER_ALIGNMENT);
+//        pnlPartName.setBackground(Color.lightGray);
+//
+//
+//
+//        JLabel lblPartName = new JLabel("models.Part name:");
+//        lblPartName.setFont(new Font("Sans", Font.PLAIN, 14));
+//        lblPartName.setMaximumSize(new Dimension(100, 30));
+//
+//        JTextField txtPartName = new JTextField();
+//        txtPartName.setFont(new Font("Sans", Font.PLAIN, 14));
+//        txtPartName.setMaximumSize(new Dimension(225, 30));
+//        txtPartName.setText(part.getPartName());
+//        //txtPartName.setText(part.getIdentification());
+//
+//
+//
+//
+//        /**txtPartName.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent actionEvent) {
+//                System.out.println("Inside action performed for textfield");
+//                String text = txtPartName.getText();
+//                ToCTeditor.controller.setPartName(text);
+//                System.out.println("Current text: " + text);
+//            }
+//        });*/
+//        /**txtPartName.addActionListener(new ActionListener(){
+//            public void actionPerformed(ActionEvent evt) {
+//
+//            }
+//        });*/
+//
+//        pnlPartName.add(Box.createRigidArea(new Dimension(5,0)));
+//        pnlPartName.add(lblPartName);
+//        pnlPartName.add(Box.createRigidArea(new Dimension(5,0)));
+//        pnlPartName.add(txtPartName);
+//        pnlPartName.add(Box.createRigidArea(new Dimension(5,0)));
+//
+//        /**
+//         * Create label panel and add components to panel
+//         */
+//        JPanel pnlLabel = new JPanel();
+//        pnlLabel.setLayout(new BoxLayout(pnlLabel, BoxLayout.LINE_AXIS));
+//        pnlLabel.setMaximumSize(new Dimension(340,30));
+//        pnlLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+//        pnlLabel.setBackground(Color.lightGray);
+//
+//        JLabel lblLabel = new JLabel("Label:");
+//        lblLabel.setFont(new Font("Sans", Font.PLAIN, 14));
+//        lblLabel.setMaximumSize(new Dimension(100, 30));
+//
+//        JTextField txtLabel = new JTextField();
+//        txtLabel.setFont(new Font("Sans", Font.PLAIN, 14));
+//        txtLabel.setMaximumSize(new Dimension(225, 30));
+//        txtLabel.setText(part.getLabel());
+//
+//        pnlLabel.add(Box.createRigidArea(new Dimension(5,0)));
+//        pnlLabel.add(lblLabel);
+//        pnlLabel.add(Box.createRigidArea(new Dimension(5,0)));
+//        pnlLabel.add(txtLabel);
+//        pnlLabel.add(Box.createRigidArea(new Dimension(5,0)));
+//        /**
+//         * Create part name panel and add components to panel
+//         */
+//        JPanel pnlNextPart = new JPanel();
+//        pnlNextPart.setLayout(new BoxLayout(pnlNextPart, BoxLayout.LINE_AXIS));
+//        pnlNextPart.setMaximumSize(new Dimension(340,30));
+//        pnlNextPart.setAlignmentX(Component.CENTER_ALIGNMENT);
+//        pnlNextPart.setBackground(Color.lightGray);
+//
+//
+//        JLabel lblNextPart = new JLabel("Next models.Part:");
+//        lblNextPart.setFont(new Font("Sans", Font.PLAIN, 14));
+//        lblNextPart.setMaximumSize(new Dimension(100, 30));
+//
+//        JTextField txtNextPart = new JTextField();
+//        txtNextPart.setFont(new Font("Sans", Font.PLAIN, 14));
+//        txtNextPart.setMaximumSize(new Dimension(225, 30));
+//        txtNextPart.setText(part.getNextPart());
+//        //txtNextPart.setText(ToCTeditor.dataModel.getItem( part.getIndex()).toString());
+//
+//        pnlNextPart.add(Box.createRigidArea(new Dimension(5,0)));
+//        pnlNextPart.add(lblNextPart);
+//        pnlNextPart.add(Box.createRigidArea(new Dimension(5,0)));
+//        pnlNextPart.add(txtNextPart);
+//        pnlNextPart.add(Box.createRigidArea(new Dimension(5,0)));
+//
+//        /***
+//         * Add all panels to main panel - i.e. Slot editor panel
+//         */
+//        pnlSlotEditor.add(Box.createRigidArea(new Dimension(0,10)));
+//        pnlSlotEditor.add(pnlPartName);
+//        pnlSlotEditor.add(Box.createRigidArea(new Dimension(0,10)));
+//        pnlSlotEditor.add(pnlLabel);
+//        pnlSlotEditor.add(Box.createRigidArea(new Dimension(0,10)));
+//        pnlSlotEditor.add(pnlNextPart);
+//
+//        return pnlSlotEditor;
+//    }
+
+
+    public JPanel setupSlotEditor(Slot part) {
         /**
          * Slot Editor Panel
          */
@@ -1133,123 +1257,12 @@ public class TemplateItems {
         pnlPartName.setAlignmentX(Component.CENTER_ALIGNMENT);
         pnlPartName.setBackground(Color.lightGray);
 
+//        Method[] methods = Part.class.getDeclaredMethods();
+//        for (Method method : methods) {
+//            method.invoke(part);
+//        }
 
-
-        JLabel lblPartName = new JLabel("Part name:");
-        lblPartName.setFont(new Font("Sans", Font.PLAIN, 14));
-        lblPartName.setMaximumSize(new Dimension(100, 30));
-
-        JTextField txtPartName = new JTextField();
-        txtPartName.setFont(new Font("Sans", Font.PLAIN, 14));
-        txtPartName.setMaximumSize(new Dimension(225, 30));
-        txtPartName.setText(part.getPartName());
-        //txtPartName.setText(part.getIdentification());
-
-
-
-
-        /**txtPartName.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                System.out.println("Inside action performed for textfield");
-                String text = txtPartName.getText();
-                ToCTeditor.controller.setPartName(text);
-                System.out.println("Current text: " + text);
-            }
-        });*/
-        /**txtPartName.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent evt) {
-
-            }
-        });*/
-
-        pnlPartName.add(Box.createRigidArea(new Dimension(5,0)));
-        pnlPartName.add(lblPartName);
-        pnlPartName.add(Box.createRigidArea(new Dimension(5,0)));
-        pnlPartName.add(txtPartName);
-        pnlPartName.add(Box.createRigidArea(new Dimension(5,0)));
-
-        /**
-         * Create label panel and add components to panel
-         */
-        JPanel pnlLabel = new JPanel();
-        pnlLabel.setLayout(new BoxLayout(pnlLabel, BoxLayout.LINE_AXIS));
-        pnlLabel.setMaximumSize(new Dimension(340,30));
-        pnlLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        pnlLabel.setBackground(Color.lightGray);
-
-        JLabel lblLabel = new JLabel("Label:");
-        lblLabel.setFont(new Font("Sans", Font.PLAIN, 14));
-        lblLabel.setMaximumSize(new Dimension(100, 30));
-
-        JTextField txtLabel = new JTextField();
-        txtLabel.setFont(new Font("Sans", Font.PLAIN, 14));
-        txtLabel.setMaximumSize(new Dimension(225, 30));
-        txtLabel.setText(part.getLabel());
-
-        pnlLabel.add(Box.createRigidArea(new Dimension(5,0)));
-        pnlLabel.add(lblLabel);
-        pnlLabel.add(Box.createRigidArea(new Dimension(5,0)));
-        pnlLabel.add(txtLabel);
-        pnlLabel.add(Box.createRigidArea(new Dimension(5,0)));
-        /**
-         * Create part name panel and add components to panel
-         */
-        JPanel pnlNextPart = new JPanel();
-        pnlNextPart.setLayout(new BoxLayout(pnlNextPart, BoxLayout.LINE_AXIS));
-        pnlNextPart.setMaximumSize(new Dimension(340,30));
-        pnlNextPart.setAlignmentX(Component.CENTER_ALIGNMENT);
-        pnlNextPart.setBackground(Color.lightGray);
-
-
-        JLabel lblNextPart = new JLabel("Next Part:");
-        lblNextPart.setFont(new Font("Sans", Font.PLAIN, 14));
-        lblNextPart.setMaximumSize(new Dimension(100, 30));
-
-        JTextField txtNextPart = new JTextField();
-        txtNextPart.setFont(new Font("Sans", Font.PLAIN, 14));
-        txtNextPart.setMaximumSize(new Dimension(225, 30));
-        txtNextPart.setText(part.getNextPart());
-        //txtNextPart.setText(ToCTeditor.dataModel.getItem( part.getIndex()).toString());
-
-        pnlNextPart.add(Box.createRigidArea(new Dimension(5,0)));
-        pnlNextPart.add(lblNextPart);
-        pnlNextPart.add(Box.createRigidArea(new Dimension(5,0)));
-        pnlNextPart.add(txtNextPart);
-        pnlNextPart.add(Box.createRigidArea(new Dimension(5,0)));
-
-        /***
-         * Add all panels to main panel - i.e. Slot editor panel
-         */
-        pnlSlotEditor.add(Box.createRigidArea(new Dimension(0,10)));
-        pnlSlotEditor.add(pnlPartName);
-        pnlSlotEditor.add(Box.createRigidArea(new Dimension(0,10)));
-        pnlSlotEditor.add(pnlLabel);
-        pnlSlotEditor.add(Box.createRigidArea(new Dimension(0,10)));
-        pnlSlotEditor.add(pnlNextPart);
-
-        return pnlSlotEditor;
-    }
-    public JPanel setupSlotEditor(Slot part){
-        /**
-         * Slot Editor Panel
-         */
-        JPanel pnlSlotEditor = new JPanel();
-        pnlSlotEditor.setLayout(new BoxLayout(pnlSlotEditor, BoxLayout.Y_AXIS));
-        pnlSlotEditor.setMinimumSize(new Dimension(345,250));
-        pnlSlotEditor.setMaximumSize(new Dimension(345,250));
-        pnlSlotEditor.setBackground(Color.lightGray);
-
-        /**
-         * Create part name panel and add components to panel
-         */
-        JPanel pnlPartName = new JPanel();
-        pnlPartName.setLayout(new BoxLayout(pnlPartName, BoxLayout.LINE_AXIS));
-        pnlPartName.setMaximumSize(new Dimension(340,30));
-        pnlPartName.setAlignmentX(Component.CENTER_ALIGNMENT);
-        pnlPartName.setBackground(Color.lightGray);
-
-        JLabel lblPartName = new JLabel("Part name:");
+        JLabel lblPartName = new JLabel("Name:");
         lblPartName.setFont(new Font("Sans", Font.PLAIN, 14));
         lblPartName.setMaximumSize(new Dimension(100, 30));
 
@@ -1257,7 +1270,7 @@ public class TemplateItems {
         txtPartName.setFont(new Font("Sans", Font.PLAIN, 14));
         txtPartName.setMaximumSize(new Dimension(225, 30));
 
-        if (part.getSerialisedName() != null){
+        if (part.getSerialisedName() != null) {
             txtPartName.setText(part.getSerialisedName());
         }
 
@@ -1320,7 +1333,7 @@ public class TemplateItems {
         pnlNextPart.setBackground(Color.lightGray);
 
 
-        JLabel lblNextPart = new JLabel("Next Part:");
+        JLabel lblNextPart = new JLabel("Next models.Part:");
         lblNextPart.setFont(new Font("Sans", Font.PLAIN, 14));
         lblNextPart.setMaximumSize(new Dimension(100, 30));
 
@@ -1358,11 +1371,11 @@ public class TemplateItems {
         /**else if ( ToCTeditor.dataModel.findTemplatePortion(updatedText) != null ){
             part.setNextPart(ToCTeditor.dataModel.findWordPortion(updatedText));
         }*/
-        updateTurtlePanel(getPartPanelTurtle(part));
+        updateTurtlePanel(getPartPanelTurtle());
         updateItems();
     }
     private void updateValue(TemplatePortion part, String updatedText) {
-        String type = ToCTeditor.turtleGen.getPartType(part);
+        String type = part.getClass().getSimpleName();
         if (type.equals("Slot")){
             ((Slot)part).setValue(updatedText);
         }
@@ -1377,12 +1390,12 @@ public class TemplateItems {
             //((Punctuation)part).setValue(updatedText);
         }
 
-        updateTurtlePanel(getPartPanelTurtle(part));
+        updateTurtlePanel(getPartPanelTurtle());
         updateItems();
     }
     private void updateName(TemplatePortion part, String updatedText) {
         part.setSerialisedName(updatedText);
-        updateTurtlePanel(getPartPanelTurtle(part));
+        updateTurtlePanel(getPartPanelTurtle());
         updateItems();
     }
 
@@ -1405,7 +1418,7 @@ public class TemplateItems {
         pnlPartName.setBackground(Color.lightGray);
 
 
-        JLabel lblPartName = new JLabel("Part name:");
+        JLabel lblPartName = new JLabel("Name:");
         lblPartName.setFont(new Font("Sans", Font.PLAIN, 14));
         lblPartName.setMaximumSize(new Dimension(100, 30));
 
@@ -1454,7 +1467,7 @@ public class TemplateItems {
         pnlNextPart.setBackground(Color.lightGray);
 
 
-        JLabel lblNextPart = new JLabel("Next Part:");
+        JLabel lblNextPart = new JLabel("Next models.Part:");
         lblNextPart.setFont(new Font("Sans", Font.PLAIN, 14));
         lblNextPart.setMaximumSize(new Dimension(100, 30));
 
@@ -1501,7 +1514,7 @@ public class TemplateItems {
         pnlPartName.setBackground(Color.lightGray);
 
 
-        JLabel lblPartName = new JLabel("Part name:");
+        JLabel lblPartName = new JLabel("Name:");
         lblPartName.setFont(new Font("Sans", Font.PLAIN, 14));
         lblPartName.setMaximumSize(new Dimension(100, 30));
 
@@ -1557,7 +1570,7 @@ public class TemplateItems {
         pnlNextPart.setBackground(Color.lightGray);
 
 
-        JLabel lblNextPart = new JLabel("Next Part:");
+        JLabel lblNextPart = new JLabel("Next models.Part:");
         lblNextPart.setFont(new Font("Sans", Font.PLAIN, 14));
         lblNextPart.setMaximumSize(new Dimension(100, 30));
 
@@ -1608,7 +1621,7 @@ public class TemplateItems {
         pnlPartName.setBackground(Color.lightGray);
 
 
-        JLabel lblPartName = new JLabel("Part name:");
+        JLabel lblPartName = new JLabel("Name:");
         lblPartName.setFont(new Font("Sans", Font.PLAIN, 14));
         lblPartName.setMaximumSize(new Dimension(100, 30));
 
@@ -1677,7 +1690,7 @@ public class TemplateItems {
         pnlPartName.setBackground(Color.lightGray);
 
 
-        JLabel lblPartName = new JLabel("Part name:");
+        JLabel lblPartName = new JLabel("Name:");
         lblPartName.setFont(new Font("Sans", Font.PLAIN, 14));
         lblPartName.setMaximumSize(new Dimension(100, 30));
 
@@ -1750,7 +1763,7 @@ public class TemplateItems {
         pnlPartName.setBackground(Color.lightGray);
 
 
-        JLabel lblPartName = new JLabel("Part name:");
+        JLabel lblPartName = new JLabel("Name:");
         lblPartName.setFont(new Font("Sans", Font.PLAIN, 14));
         lblPartName.setMaximumSize(new Dimension(100, 30));
 
@@ -1818,7 +1831,7 @@ public class TemplateItems {
         pnlPartName.setBackground(Color.lightGray);
 
 
-        JLabel lblPartName = new JLabel("Part name:");
+        JLabel lblPartName = new JLabel("Name:");
         lblPartName.setFont(new Font("Sans", Font.PLAIN, 14));
         lblPartName.setMaximumSize(new Dimension(100, 30));
 
@@ -1870,7 +1883,7 @@ public class TemplateItems {
         pnlFirstPart.setBackground(Color.lightGray);
 
 
-        JLabel lblFirstPart = new JLabel("First Part:");
+        JLabel lblFirstPart = new JLabel("First models.Part:");
         lblFirstPart.setFont(new Font("Sans", Font.PLAIN, 14));
         lblFirstPart.setMaximumSize(new Dimension(100, 30));
 
@@ -1896,7 +1909,7 @@ public class TemplateItems {
         pnlLastPart.setBackground(Color.lightGray);
 
 
-        JLabel lblLastPart = new JLabel("Last Part:");
+        JLabel lblLastPart = new JLabel("Last models.Part:");
         lblLastPart.setFont(new Font("Sans", Font.PLAIN, 14));
         lblLastPart.setMaximumSize(new Dimension(100, 30));
 
@@ -1922,7 +1935,7 @@ public class TemplateItems {
         pnlNextPart.setBackground(Color.lightGray);
 
 
-        JLabel lblNextPart = new JLabel("Next Part:");
+        JLabel lblNextPart = new JLabel("Next models.Part:");
         lblNextPart.setFont(new Font("Sans", Font.PLAIN, 14));
         lblNextPart.setMaximumSize(new Dimension(100, 30));
 
@@ -1973,7 +1986,7 @@ public class TemplateItems {
         pnlPartName.setBackground(Color.lightGray);
 
 
-        JLabel lblPartName = new JLabel("Part name:");
+        JLabel lblPartName = new JLabel("Nme:");
         lblPartName.setFont(new Font("Sans", Font.PLAIN, 14));
         lblPartName.setMaximumSize(new Dimension(100, 30));
 
@@ -2051,7 +2064,7 @@ public class TemplateItems {
         pnlFirstPart.setBackground(Color.lightGray);
 
 
-        JLabel lblFirstPart = new JLabel("First Part:");
+        JLabel lblFirstPart = new JLabel("First models.Part:");
         lblFirstPart.setFont(new Font("Sans", Font.PLAIN, 14));
         lblFirstPart.setMaximumSize(new Dimension(100, 30));
 
@@ -2079,7 +2092,7 @@ public class TemplateItems {
         pnlLastPart.setBackground(Color.lightGray);
 
 
-        JLabel lblLastPart = new JLabel("Last Part:");
+        JLabel lblLastPart = new JLabel("Last models.Part:");
         lblLastPart.setFont(new Font("Sans", Font.PLAIN, 14));
         lblLastPart.setMaximumSize(new Dimension(100, 30));
 
@@ -2107,7 +2120,7 @@ public class TemplateItems {
         pnlNextPart.setBackground(Color.lightGray);
 
 
-        JLabel lblNextPart = new JLabel("Next Part:");
+        JLabel lblNextPart = new JLabel("Next models.Part:");
         lblNextPart.setFont(new Font("Sans", Font.PLAIN, 14));
         lblNextPart.setMaximumSize(new Dimension(100, 30));
 
@@ -2197,7 +2210,7 @@ public class TemplateItems {
         pnlPartName.setBackground(Color.lightGray);
 
 
-        JLabel lblPartName = new JLabel("Part name:");
+        JLabel lblPartName = new JLabel("models.Part name:");
         lblPartName.setFont(new Font("Sans", Font.PLAIN, 14));
         lblPartName.setMaximumSize(new Dimension(100, 30));
 
@@ -2272,7 +2285,7 @@ public class TemplateItems {
         pnlNextPart.setBackground(Color.lightGray);
 
 
-        JLabel lblNextPart = new JLabel("Next Part:");
+        JLabel lblNextPart = new JLabel("Next models.Part:");
         lblNextPart.setFont(new Font("Sans", Font.PLAIN, 14));
         lblNextPart.setMaximumSize(new Dimension(100, 30));
 
@@ -2321,7 +2334,7 @@ public class TemplateItems {
         pnlPartName.setBackground(Color.lightGray);
 
 
-        JLabel lblPartName = new JLabel("Part name:");
+        JLabel lblPartName = new JLabel("models.Part name:");
         lblPartName.setFont(new Font("Sans", Font.PLAIN, 14));
         lblPartName.setMaximumSize(new Dimension(100, 30));
 
@@ -2370,7 +2383,7 @@ public class TemplateItems {
         pnlNextPart.setBackground(Color.lightGray);
 
 
-        JLabel lblNextPart = new JLabel("Next Part:");
+        JLabel lblNextPart = new JLabel("Next models.Part:");
         lblNextPart.setFont(new Font("Sans", Font.PLAIN, 14));
         lblNextPart.setMaximumSize(new Dimension(100, 30));
 
@@ -2398,7 +2411,8 @@ public class TemplateItems {
 
         return pnlPhraseEditor;
     }
-    public JPanel setupPhraseEditor(Phrase part){
+    public JPanel setupPhraseEditor(Phrase part) {
+        System.out.println("setupPhraseEditor called");
         /**
          * Phrase Editor Panel
          */
@@ -2417,7 +2431,7 @@ public class TemplateItems {
         pnlPartName.setBackground(Color.lightGray);
 
 
-        JLabel lblPartName = new JLabel("Part name:");
+        JLabel lblPartName = new JLabel("Name:");
         lblPartName.setFont(new Font("Sans", Font.PLAIN, 14));
         lblPartName.setMaximumSize(new Dimension(100, 30));
 
@@ -2473,7 +2487,7 @@ public class TemplateItems {
         pnlNextPart.setBackground(Color.lightGray);
 
 
-        JLabel lblNextPart = new JLabel("Next Part:");
+        JLabel lblNextPart = new JLabel("Next models.Part:");
         lblNextPart.setFont(new Font("Sans", Font.PLAIN, 14));
         lblNextPart.setMaximumSize(new Dimension(100, 30));
 
@@ -2528,7 +2542,7 @@ public class TemplateItems {
         pnlPartName.setBackground(Color.lightGray);
 
 
-        JLabel lblPartName = new JLabel("Part name:");
+        JLabel lblPartName = new JLabel("models.Part name:");
         lblPartName.setFont(new Font("Sans", Font.PLAIN, 14));
         lblPartName.setMaximumSize(new Dimension(100, 30));
 
@@ -2576,7 +2590,7 @@ public class TemplateItems {
         pnlNextPart.setBackground(Color.lightGray);
 
 
-        JLabel lblNextPart = new JLabel("Next Part:");
+        JLabel lblNextPart = new JLabel("Next models.Part:");
         lblNextPart.setFont(new Font("Sans", Font.PLAIN, 14));
         lblNextPart.setMaximumSize(new Dimension(100, 30));
 
@@ -2623,7 +2637,7 @@ public class TemplateItems {
         pnlPartName.setBackground(Color.lightGray);
 
 
-        JLabel lblPartName = new JLabel("Part name:");
+        JLabel lblPartName = new JLabel("models.Part name:");
         lblPartName.setFont(new Font("Sans", Font.PLAIN, 14));
         lblPartName.setMaximumSize(new Dimension(100, 30));
 

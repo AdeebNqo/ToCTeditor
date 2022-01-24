@@ -1,14 +1,3 @@
-/*
- * @(#) CreateMorpheme.java   1.0   Dec 08, 2021
- *
- * Sindiso Mkhatshwa (mkhsin035@myuct.ac.za)
- *
- * Nitschke Laboratory, UCT
- *
- * @(#) $Id$
- */
-
-import za.co.mahlaza.research.grammarengine.base.models.feature.ConcordType;
 import za.co.mahlaza.research.grammarengine.base.models.feature.Feature;
 import za.co.mahlaza.research.grammarengine.base.models.interfaces.InternalSlotRootAffix;
 import za.co.mahlaza.research.grammarengine.base.models.template.Concord;
@@ -16,10 +5,8 @@ import za.co.mahlaza.research.grammarengine.base.models.template.Copula;
 import za.co.mahlaza.research.grammarengine.base.models.template.Locative;
 import za.co.mahlaza.research.grammarengine.base.models.template.PolymorphicWord;
 import za.co.mahlaza.research.grammarengine.base.models.template.Root;
-import za.co.mahlaza.research.grammarengine.base.models.template.Slot;
 import za.co.mahlaza.research.grammarengine.base.models.template.TemplatePortion;
 import za.co.mahlaza.research.grammarengine.base.models.template.UnimorphicAffix;
-import za.co.mahlaza.research.grammarengine.base.models.template.UnimorphicWord;
 
 import javax.swing.*;
 import java.awt.*;
@@ -139,7 +126,7 @@ public class CreateMorpheme {
         btnCreate.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
 
-                    ToCTeditor.dataModel.addTemplatePortion(new PolymorphicWord(wordPortions, featuresList));
+/*                    ToCTeditor.dataModel.addTemplatePortion(new PolymorphicWord(wordPortions, featuresList));
                     int portionNumber = 0;
                     if (ToCTeditor.dataModel.getTemplatePortions().size() > 1){
                         portionNumber = ToCTeditor.dataModel.getTemplatePortions().size();
@@ -148,7 +135,7 @@ public class CreateMorpheme {
                     }
                     String id = "polyword" + portionNumber;
 
-                    ToCTeditor.dataModel.getTemplatePortion(ToCTeditor.dataModel.getTemplatePortions().size() - 1).setSerialisedName(id);
+                    ToCTeditor.dataModel.getTemplatePortion(ToCTeditor.dataModel.getTemplatePortions().size() - 1).setSerialisedName(id);*/
 
                     ToCTeditor.gui = new ViewThread();
                     ToCTeditor.gui.setCallTemplateItems(true);
@@ -496,8 +483,8 @@ public class CreateMorpheme {
 
 
         for (InternalSlotRootAffix part : list) {
-            JLabel name = new JLabel(ToCTeditor.turtleGen.getMorphemeId(part));
-            JLabel type = new JLabel(ToCTeditor.turtleGen.getMorphemeType(part));
+            JLabel name = new JLabel(part.getSerialisedName());
+            JLabel type = new JLabel(part.getType());
             box.add(createItemComponent(name, type));
         }
         JPanel p = new JPanel();

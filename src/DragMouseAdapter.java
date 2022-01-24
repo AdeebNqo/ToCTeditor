@@ -29,50 +29,34 @@ public class DragMouseAdapter extends MouseAdapter {
     }
 
     @Override public void mousePressed(MouseEvent e) {
+        System.out.println("mousePressed called");
+
         JComponent parent = (JComponent) e.getComponent();
-        if (parent.getComponentCount() <= 1) {
+        System.out.println("Parent = "+parent);
+        System.out.println("Parent size = "+parent.getComponentCount());
+        if (parent.getComponentCount() < 1) {
             startPt = null;
             return;
         }
-
         startPt = e.getPoint();
 
-        /****
-         * SM
-         */
         Component c = parent.getComponentAt(startPt);
-        /**String type;
-        if (c instanceof JPanel){
-            System.out.println("Panel has " + ((JPanel)c).getComponentCount() + " components.");
-            Component typePanel = ((JPanel)c).getComponent(2);
-            if ( typePanel instanceof JPanel){
-               type = ((JLabel)((JPanel)typePanel).getComponent(0)).getText();
-               System.out.println("Component Type: " + type);
-               if (type.equals("Polymorphic word")){
-
-               }
-            }
-        }*/
-
         index = parent.getComponentZOrder(c);
 
-        if (ToCTeditor.gui.getIndex() != index){
+        System.out.println(ToCTeditor.gui.getIndex()+" --- "+index);
+        //if (ToCTeditor.gui.getIndex() != index) {
             ToCTeditor.gui.setIndex(index);
-        if (ToCTeditor.DEBUG){
-                ToCTeditor.templateItems.updateEditorPanel(ToCTeditor.templateItems.getPartPanelEditor(ToCTeditor.gui.getCurrentTemplatePortion()));
-                ToCTeditor.templateItems.updateTurtlePanel(ToCTeditor.templateItems.getPartPanelTurtle(ToCTeditor.gui.getCurrentTemplatePortion()));
-            }
-            else {
-                ToCTeditor.templateItems.updateEditorPanel(ToCTeditor.templateItems.getPartPanelEditor(ToCTeditor.gui.getCurrentPart()));
-                ToCTeditor.templateItems.updateTurtlePanel(ToCTeditor.templateItems.getPartPanelTurtle(ToCTeditor.gui.getCurrentPart()));
-            }
+            TemplatePortion currentPortion = ToCTeditorFrame.currTemplate.getPortionAt(index);
+            JPanel editorPanel;
+            JPanel previewPanel;
 
-        }
+            editorPanel = ToCTeditor.templateItems.getPartPanelEditor(currentPortion);
+            previewPanel = ToCTeditor.templateItems.getPartPanelTurtle();
 
-
+            ToCTeditor.templateItems.updateEditorPanel(editorPanel);
+            ToCTeditor.templateItems.updateTurtlePanel(previewPanel);
+        //}
     }
-
-
 
     private void startDragging(JComponent parent, Point pt) {
         //get a dragging panel

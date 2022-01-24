@@ -1,3 +1,4 @@
+import models.Part;
 import za.co.mahlaza.research.grammarengine.base.models.interfaces.InternalSlotRootAffix;
 import za.co.mahlaza.research.grammarengine.base.models.template.*;
 import za.co.mahlaza.research.grammarengine.base.models.template.Concord;

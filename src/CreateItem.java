@@ -1,22 +1,5 @@
-/*
- * @(#) CreateItem.java   1.0   Nov 12, 2021
- *
- * Sindiso Mkhatshwa (mkhsin035@myuct.ac.za)
- *
- * Nitschke Laboratory, UCT
- *
- * @(#) $Id$
- */
-
-import za.co.mahlaza.research.grammarengine.base.models.feature.ConcordType;
 import za.co.mahlaza.research.grammarengine.base.models.feature.Feature;
-import za.co.mahlaza.research.grammarengine.base.models.interfaces.InternalSlotRootAffix;
-import za.co.mahlaza.research.grammarengine.base.models.template.Phrase;
-import za.co.mahlaza.research.grammarengine.base.models.template.PolymorphicWord;
-import za.co.mahlaza.research.grammarengine.base.models.template.Punctuation;
-import za.co.mahlaza.research.grammarengine.base.models.template.Slot;
-import za.co.mahlaza.research.grammarengine.base.models.template.TemplatePortion;
-import za.co.mahlaza.research.grammarengine.base.models.template.UnimorphicWord;
+import za.co.mahlaza.research.grammarengine.base.models.template.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -120,8 +103,7 @@ public class CreateItem {
         pnlExistingItem.add(Box.createRigidArea(new Dimension(0,5)));
         pnlExistingItem.add(pnlSearchField);
 
-        pnlExistingItem.add(setupExistingItems(ToCTeditor.dataModel.getTemplatePortions()));
-
+        pnlExistingItem.add(setupExistingItems(ToCTeditorFrame.currTemplate.getTemplatePortions()));
 
 
         /**
@@ -165,9 +147,6 @@ public class CreateItem {
         /**pnlButtons.add(Box.createRigidArea(new Dimension(10,0)));
         pnlButtons.add(btnAdd);*/
 
-
-
-
         // Add heading label to list panel
         listPane.add(pnlItemsTitle);
         listPane.add(Box.createRigidArea(new Dimension(0,5)));
@@ -192,11 +171,20 @@ public class CreateItem {
 
         g.add(pnlMain);
 
-
         frame.setContentPane(g);
     }
 
-    public JComponent createTemplateItem(String type){
+    private TemplatePortion getSecondLastPortion() {
+        int templateSize = ToCTeditorFrame.currTemplate.getTemplatePortions().size();
+        return frame.currTemplate.getPortionAt(templateSize-2);
+    }
+
+    private TemplatePortion getLastPortion() {
+        int templateSize = ToCTeditorFrame.currTemplate.getTemplatePortions().size();
+        return frame.currTemplate.getPortionAt(templateSize-1);
+    }
+
+    public JComponent createTemplateItem(String type) {
 
         JButton btnType = new JButton(type);
         btnType.setFont(new Font("Sans", Font.PLAIN, 13));
@@ -205,121 +193,87 @@ public class CreateItem {
         btnType.setMaximumSize(new Dimension(150, 50));
         btnType.setBackground(Color.white);
 
-        /**btnType.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createEmptyBorder(5, 5, 5, 5),
-                BorderFactory.createLineBorder(Color.BLUE, 2)));*/
         /**
          * Add the listener to the JButton to handle the "pressed" event
          */
 
-        if (type.equals("Slot")){
+        if (type.equals("Slot")) {
+
             btnType.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e){
                     List<Feature> featureList = new ArrayList<>();
-                    ToCTeditor.dataModel.addTemplatePortion(new Slot("", featureList));
-                    int portionNumber = 0;
-                    if (ToCTeditor.dataModel.getTemplatePortions().size() > 1){
-                        portionNumber = ToCTeditor.dataModel.getTemplatePortions().size();
-                        ToCTeditor.dataModel.getTemplatePortion(ToCTeditor.dataModel.getTemplatePortions().size()-2)
-                                .setNextPart(ToCTeditor.dataModel.getTemplatePortion(ToCTeditor.dataModel.getTemplatePortions().size()-1));
+                    frame.currTemplate.addTemplatePortion(new Slot("", featureList));
+                    int templateSize = frame.currTemplate.getTemplatePortions().size();
+                    if (templateSize > 1) {
+                        getSecondLastPortion().setNextPart(getLastPortion());
                     }
-                    String id = "slot" + portionNumber;
 
-                    ToCTeditor.dataModel.getTemplatePortion(ToCTeditor.dataModel.getTemplatePortions().size()-1).setSerialisedName(id);
-
-
-                    ToCTeditor.gui = new ViewThread(ToCTeditor.homeScreen, ToCTeditor.templateItems, ToCTeditor.createItem, ToCTeditor.dataModel);
-                    ToCTeditor.gui.setCallTemplateItems(true);
-                    ToCTeditor.gui.setIndex(ToCTeditor.dataModel.getTemplatePortions().size()-1);
-                    ToCTeditor.gui.start();
-
+                    String id = "slot" + templateSize;
+                    getLastPortion().setSerialisedName(id);
+                    viewCurrentTemplate();
                 }
             });
         }
-        else if (type.equals("Unimorphic word")){
+        else if (type.equals("Unimorphic word")) {
             btnType.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e){
                     List<Feature> featureList = new ArrayList<>();
-                    ToCTeditor.dataModel.addTemplatePortion(new UnimorphicWord(""));
-                    int portionNumber = 0;
-                    if (ToCTeditor.dataModel.getTemplatePortions().size() > 1){
-                        portionNumber = ToCTeditor.dataModel.getTemplatePortions().size();
-                        ToCTeditor.dataModel.getTemplatePortion(ToCTeditor.dataModel.getTemplatePortions().size()-2)
-                                .setNextPart(ToCTeditor.dataModel.getTemplatePortion(ToCTeditor.dataModel.getTemplatePortions().size()-1));
+                    frame.currTemplate.addTemplatePortion(new UnimorphicWord(""));
+                    int templateSize = frame.currTemplate.getTemplatePortions().size();
+                    if (templateSize > 1) {
+                        getSecondLastPortion().setNextPart(getLastPortion());
                     }
-                    String id = "uniword" + portionNumber;
 
-                    ToCTeditor.dataModel.getTemplatePortion(ToCTeditor.dataModel.getTemplatePortions().size()-1).setSerialisedName(id);
-
-
-                    ToCTeditor.gui = new ViewThread(ToCTeditor.homeScreen, ToCTeditor.templateItems, ToCTeditor.createItem, ToCTeditor.dataModel);
-                    ToCTeditor.gui.setCallTemplateItems(true);
-                    ToCTeditor.gui.setIndex(ToCTeditor.dataModel.getTemplatePortions().size()-1);
-                    ToCTeditor.gui.start();
-
+                    String id = "uniword" + templateSize;
+                    getLastPortion().setSerialisedName(id);
+                    viewCurrentTemplate();
                 }
             });
         }
         else if (type.equals("Polymorphic word")){
-            btnType.addActionListener(new ActionListener(){
-                public void actionPerformed(ActionEvent e){
-
-                    ToCTeditor.gui = new ViewThread();
-                    ToCTeditor.gui.setCallCreateMorpheme(true);
-                    ToCTeditor.gui.setIndex(-1);
-                    ToCTeditor.gui.start();
-
-                }
+            btnType.addActionListener(e -> {
+                ToCTeditor.gui = new ViewThread();
+                ToCTeditor.gui.setCallCreateMorpheme(true);
+                ToCTeditor.gui.setIndex(-1);
+                ToCTeditor.gui.start();
             });
         }
 
         else if (type.equals("Punctuation")){
             btnType.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e){
-                    ToCTeditor.dataModel.addTemplatePortion(new Punctuation(""));
-                    int portionNumber = 0;
-                    if (ToCTeditor.dataModel.getTemplatePortions().size() > 1){
-                        portionNumber = ToCTeditor.dataModel.getTemplatePortions().size();
-                        ToCTeditor.dataModel.getTemplatePortion(ToCTeditor.dataModel.getTemplatePortions().size()-2)
-                                .setNextPart(ToCTeditor.dataModel.getTemplatePortion(ToCTeditor.dataModel.getTemplatePortions().size()-1));
+                    frame.currTemplate.addTemplatePortion(new Punctuation(""));
+                    int templateSize = frame.currTemplate.getTemplatePortions().size();
+                    if (templateSize > 1){
+                        getSecondLastPortion().setNextPart(getLastPortion());
                     }
-                    String id = "punct" + portionNumber;
-
-                    ToCTeditor.dataModel.getTemplatePortion(ToCTeditor.dataModel.getTemplatePortions().size()-1).setSerialisedName(id);
-
-                    ToCTeditor.gui = new ViewThread(ToCTeditor.homeScreen, ToCTeditor.templateItems, ToCTeditor.createItem, ToCTeditor.dataModel);
-                    ToCTeditor.gui.setCallTemplateItems(true);
-                    ToCTeditor.gui.setIndex(ToCTeditor.dataModel.getTemplatePortions().size()-1);
-                    ToCTeditor.gui.start();
-
+                    String id = "punct" + templateSize;
+                    getLastPortion().setSerialisedName(id);
+                    viewCurrentTemplate();
                 }
             });
         }
-        else if (type.equals("Phrase")){
-            btnType.addActionListener(new ActionListener(){
-                public void actionPerformed(ActionEvent e){
-
-                    ToCTeditor.dataModel.addTemplatePortion(new Phrase(""));
-                    int portionNumber = 0;
-                    if (ToCTeditor.dataModel.getTemplatePortions().size() > 1){
-                        portionNumber = ToCTeditor.dataModel.getTemplatePortions().size();
-                        ToCTeditor.dataModel.getTemplatePortion(ToCTeditor.dataModel.getTemplatePortions().size()-2)
-                                .setNextPart(ToCTeditor.dataModel.getTemplatePortion(ToCTeditor.dataModel.getTemplatePortions().size()-1));
-                    }
-                    String id = "phrase" + portionNumber;
-
-                    ToCTeditor.dataModel.getTemplatePortion(ToCTeditor.dataModel.getTemplatePortions().size()-1).setSerialisedName(id);
-
-                    ToCTeditor.gui = new ViewThread(ToCTeditor.homeScreen, ToCTeditor.templateItems, ToCTeditor.createItem, ToCTeditor.dataModel);
-                    ToCTeditor.gui.setCallTemplateItems(true);
-                    ToCTeditor.gui.setIndex(ToCTeditor.dataModel.getTemplatePortions().size()-1);
-                    ToCTeditor.gui.start();
-
+        else if (type.equals("Phrase")) {
+            btnType.addActionListener(e -> {
+                frame.currTemplate.addTemplatePortion(new Phrase(""));
+                int templateSize = frame.currTemplate.getTemplatePortions().size();
+                if (templateSize> 1) {
+                    getSecondLastPortion().setNextPart(getLastPortion());
                 }
+                String id = "phrase" + templateSize;
+                getLastPortion().setSerialisedName(id);
+                viewCurrentTemplate();
             });
         }
 
         return btnType;
+    }
+
+    public void viewCurrentTemplate() {
+        ToCTeditor.gui = new ViewThread(ToCTeditor.homeScreen, ToCTeditor.templateItems, ToCTeditor.createItem, ToCTeditor.dataModel);
+        ToCTeditor.gui.setCallTemplateItems(true);
+        ToCTeditor.gui.setIndex(frame.currTemplate.getTemplatePortions().size()-1);
+        ToCTeditor.gui.start();
     }
 
     public JPanel createPartOptions(){
@@ -442,8 +396,8 @@ public class CreateItem {
          box.addMouseMotionListener(dh);*/
 
         for (TemplatePortion part : list) {
-            JLabel name = new JLabel(ToCTeditor.turtleGen.getPartId(part));
-            JLabel type = new JLabel(ToCTeditor.turtleGen.getPartType(part));
+            JLabel name = new JLabel(part.serialisedName);
+            JLabel type = new JLabel(part.getClass().getSimpleName());
             box.add(createItemComponent(name, type));
         }
         JPanel p = new JPanel();

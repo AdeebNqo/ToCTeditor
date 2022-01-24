@@ -1,16 +1,12 @@
-/*
- * @(#) ToCTeditorFrame.java   1.0   Nov 12, 2021
- *
- * Sindiso Mkhatshwa (mkhsin035@myuct.ac.za)
- *
- * Nitschke Laboratory, UCT
- *
- * @(#) $Id$
- */
+import za.co.mahlaza.research.grammarengine.base.models.template.Template;
 
 import javax.swing.*;
 
 public class ToCTeditorFrame extends JFrame {
+
+    public String currTemplateName;
+    public static Template currTemplate;
+
     private int frameX;
     private int frameY;
 

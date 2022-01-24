@@ -1,11 +1,12 @@
+import models.Part;
 import za.co.mahlaza.research.grammarengine.base.models.template.TemplatePortion;
+
+import javax.swing.*;
 
 /*
  * @(#) ViewThread.java   1.0   Nov 18, 2021
  *
  * Sindiso Mkhatshwa (mkhsin035@myuct.ac.za)
- *
- * Nitschke Laboratory, UCT
  *
  * @(#) $Id$
  */
@@ -24,40 +25,19 @@ public class ViewThread extends Thread {
     private TemplatePortion currentTemplatePortion;
 
     private int index;
-    private int toggleBtnState;
-    private int prevToggleBtnState;
 
     public ViewThread() {
-
         this.callCreateTemplate = false;
         this.callTemplateItems = false;
         this.callCreateItem = false;
         this.callCreateMorpheme = false;
-
-        // By default, set the gui to show the turtle preview
-        //this.toggleBtnState = 1;
-        //this.prevToggleBtnState = 1;
-
     }
 
     public ViewThread(CreateTemplate homeScreen, TemplateItems templateItems, CreateItem createItem, DataModel datamodel) {
-        /**this.homeScreen = homeScreen;
-        this.templateItems = templateItems;
-        this.createItem = createItem;
-        this.dataModel = datamodel;*/
-
         this.callCreateTemplate = false;
         this.callTemplateItems = false;
         this.callCreateItem = false;
         this.callCreateMorpheme = false;
-
-        // By default, set the gui to show the turtle preview
-        //this.toggleBtnState = 1;
-        //this.prevToggleBtnState = 1;
-
-
-        //this.index = -1;
-        //homeScreen.setupGUI();
     }
 
     public int getToggleBtnState() {
@@ -105,46 +85,30 @@ public class ViewThread extends Thread {
 
     @Override
     public void run() {
-        //System.out.println("ToCTeditor v 1.0");
-        //while (true) {
         currentTemplatePortion = ToCTeditor.dataModel.getTemplatePortion(index);
-
-            //System.out.println(callTemplateItems);
-            if (callCreateTemplate) {
-                //currentPart = dataModel.getPart(index);
-                //homeScreen.setupGUI();
-                ToCTeditor.homeScreen.setupGUI();
-                callCreateTemplate = false;
-            }
-            else if (callTemplateItems) {
-
-
-                //templateItems.setupGUI(templateItems.getPartPanelEditor(currentPart), templateItems.getPartPanelTurtle(currentPart));
-                //templateItems.setupGUI(templateItems.getPartPanelEditor(currentPart), templateItems.getPartPanelTurtle(currentPart));
-                ToCTeditor.templateItems.setupGUI(ToCTeditor.templateItems.getPartPanelEditor(currentTemplatePortion), ToCTeditor.templateItems.getPartPanelTurtle(currentTemplatePortion));
-                callTemplateItems = false;
-            }
-            else if (callCreateItem) {
-                //currentPart = ToCTeditor.dataModel.getPart(index);
-                //createItem.setupGUI();
-                ToCTeditor.createItem.setupGUI();
-                callCreateItem = false;
-            }
-            else if (callCreateMorpheme) {
-                //currentTemplatePortion = ToCTeditor.dataModel.getTemplatePortion(index);
-                ToCTeditor.createMorpheme.setupGUI(currentTemplatePortion);
-                callCreateItem = false;
-            }
-            else if (ToCTeditor.toggleBtnState != ToCTeditor.prevToggleBtnState){
-                //ToCTeditor.gui.templateItems.updateEditorTurtlePanel(templateItems.getPartPanelEditor(currentPart), templateItems.getPartPanelTurtle(currentPart));
-                ToCTeditor.templateItems.updateEditorTurtlePanel(ToCTeditor.templateItems.getPartPanelEditor(currentTemplatePortion), ToCTeditor.templateItems.getPartPanelTurtle(currentTemplatePortion));
-                ToCTeditor.prevToggleBtnState = ToCTeditor.toggleBtnState;
-            }
-
-
-            //templateItems.getPartPanelEditor(currentPart);
-        //}
+        if (callCreateTemplate) {
+            ToCTeditor.homeScreen.setupGUI();
+            callCreateTemplate = false;
+        }
+        else if (callTemplateItems) {
+            JPanel partEditorPanel = ToCTeditor.templateItems.getPartPanelEditor(currentTemplatePortion);
+            JPanel ttlPreviewPanel = ToCTeditor.templateItems.getPartPanelTurtle();
+            ToCTeditor.templateItems.setupGUI(partEditorPanel, ttlPreviewPanel);
+            callTemplateItems = false;
+        }
+        else if (callCreateItem) {
+            ToCTeditor.createItem.setupGUI();
+            callCreateItem = false;
+        }
+        else if (callCreateMorpheme) {
+            ToCTeditor.createMorpheme.setupGUI(currentTemplatePortion);
+            callCreateItem = false;
+        }
+        else if (ToCTeditor.toggleBtnState != ToCTeditor.prevToggleBtnState) {
+            JPanel partEditorPanel = ToCTeditor.templateItems.getPartPanelEditor(currentTemplatePortion);
+            JPanel ttlPreviewPanel = ToCTeditor.templateItems.getPartPanelTurtle();
+            ToCTeditor.templateItems.updateEditorTurtlePanel(partEditorPanel, ttlPreviewPanel);
+            ToCTeditor.prevToggleBtnState = ToCTeditor.toggleBtnState;
+        }
     }
-
-
 }

@@ -1,12 +1,3 @@
-/*
- * @(#) HintTextField.java   1.0   Nov 10, 2021
- *
- * Sindiso Mkhatshwa (mkhsin035@myuct.ac.za)
- *
- * Nitschke Laboratory, UCT
- *
- * @(#) $Id$
- */
 import javax.swing.*;
 import java.awt.*;
 

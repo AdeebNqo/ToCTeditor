@@ -1,14 +1,6 @@
-/*
- * @(#) CreateTemplate.java   1.0   Nov 10, 2021
- *
- * Sindiso Mkhatshwa (mkhsin035@myuct.ac.za)
- *
- * Nitschke Laboratory, UCT
- *
- * @(#) $Id$
- */
 import za.co.mahlaza.research.grammarengine.base.models.mola.Languoid;
 import za.co.mahlaza.research.grammarengine.base.models.template.Template;
+import za.co.mahlaza.research.grammarengine.base.models.template.TemplatePortion;
 import za.co.mahlaza.research.grammarengine.nguni.zu.ZuluFeatureParser;
 import za.co.mahlaza.research.templateparsing.TemplateReader;
 import za.co.mahlaza.research.templateparsing.URIS;
@@ -18,8 +10,9 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 public class CreateTemplate {
     private int frameX;
@@ -79,7 +72,7 @@ public class CreateTemplate {
         txtEntryTemplateName.setAlignmentX(Component.CENTER_ALIGNMENT);
         txtEntryTemplateName.setMaximumSize(new Dimension(400,30));
         txtEntryTemplateName.setFont(new Font("Sans", Font.PLAIN, 14));
-        TemplateItems.addChangeListener(txtEntryTemplateName, e -> updateTemplateName(txtEntryTemplateName.getText()));
+        //TemplateItems.addChangeListener(txtEntryTemplateName, e -> updateTemplateName(txtEntryTemplateName.getText()));
         /**txtEntryTemplateName.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -97,7 +90,7 @@ public class CreateTemplate {
         /**
          * Supported language dropdown button
          */
-        String[] languages = { "Supported language", "Zulu", "Xhosa", "Swati", "Ndebele" };
+        String[] languages = { "Supported language", "Zulu", "Xhosa", "Swati", "Ndebele" }; //TODO: load from MoLa KB
         JComboBox supportedLanguage = new JComboBox(languages);
         supportedLanguage.setSelectedIndex(0);
         supportedLanguage.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -119,38 +112,38 @@ public class CreateTemplate {
         /**
          * Add the listener to the JButton to handle the "pressed" event
          */
-        btnCreate.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
+        btnCreate.addActionListener(e -> {
+            Languoid languoid = new Languoid(); //TODO: load this from the MoLa KB
+            languoid.setSerialisedName(supportedLanguage.getSelectedItem().toString());
 
-                if (ToCTeditor.dataModel.getTemplate().getSerialisedName() == null ){
+            List<TemplatePortion> portions = new LinkedList<>();
+            Template currTemplate = new Template(portions);
+            currTemplate.setLanguage(languoid);
+            currTemplate.setSerialisedName(txtEntryTemplateName.getText());
+            String URI = "http://www.tocteditor.org/template/untitled-templates/"; //TODO: ask user for URI
+            currTemplate.setURI(URI);
+            frame.currTemplate = currTemplate;
+
+            if (frame.currTemplate.getSerialisedName() == null ) {
+                JOptionPane.showMessageDialog(
+                                            frame,
+                                    "Template name cannot be empty.",
+                                        "Template Name Error",
+                                        JOptionPane.ERROR_MESSAGE
+                                        );
+            }
+            else if (supportedLanguage.getSelectedIndex() == 0) {
                     JOptionPane.showMessageDialog(
-                                                frame,
-                                        "Template name cannot be empty.",
-                                            "Template Name Error",
+                                            frame,
+                                    "Supported language cannot be empty.",
+                                        "Supported Language Error",
                                             JOptionPane.ERROR_MESSAGE
-                                            );
-                }
-                else {
-                    if (supportedLanguage.getSelectedIndex() == 0){
-                        JOptionPane.showMessageDialog(
-                                                frame,
-                                        "Supported language cannot be empty.",
-                                            "Supported Language Error",
-                                                JOptionPane.ERROR_MESSAGE
-                                            );
-                    }
-                    else{
-                        Languoid languoid = new Languoid();
-                        languoid.setSerialisedName(supportedLanguage.getSelectedItem().toString());
-                        ToCTeditor.dataModel.getTemplate().setLanguage(languoid);
-                        ToCTeditor.gui = new ViewThread();
-                        ToCTeditor.gui.setCallTemplateItems(true);
-                        ToCTeditor.gui.start();
-                    }
-                }
-
-
-                //ToCTeditor.gui.start();
+                                        );
+            }
+            else {
+                ToCTeditor.gui = new ViewThread();
+                ToCTeditor.gui.setCallTemplateItems(true); //TODO: figure out what this is for5
+                ToCTeditor.gui.start();
             }
         });
 
@@ -214,45 +207,61 @@ public class CreateTemplate {
                 if(returnVal == JFileChooser.APPROVE_OPTION) {
                     templatePath = chooser.getSelectedFile().getAbsolutePath().trim();
 
-                    TemplateReader.Init(new ZuluFeatureParser());
-                    TemplateReader.setTemplateOntologyNamespace(URIS.ToCT_NS);
-                    TemplateReader.IS_DEBUG_ENABLED = true;
-                    Template template;
-                    try {
-
-                        Collection<String> templateURIs = TemplateReader.getTemplateURIs(templatePath);
-                        if (templateURIs.size() == 1) {
-                            templateURI = templateURIs.iterator().next();
-
-                            Collection<Template> templates = TemplateReader.parseTemplates(templateURI, templatePath);
-                            if (templates.size() == 1) {
-                                template = templates.iterator().next();
-                                ToCTeditor.dataModel.setTemplate(template);
-
-                                ToCTeditor.gui = new ViewThread();
-                                ToCTeditor.gui.setCallTemplateItems(true);
-                                ToCTeditor.gui.start();
-                                System.out.println(template.toString());  
-                            }
-                            else if (templates.size() == 0) {
-                                throw new UnsupportedOperationException("No template found in file.");
-   
-                            }
-                            else {
-                                throw new UnsupportedOperationException("Support for opening a file with multiple templates not added yet. Please seperate the templates into seperate files.");
-
-                            }
- 
+                    Collection<String> templateURIs = TemplateReader.getTemplateURIs(templatePath);
+                    //TODO: Ask user to choose the URI
+                    for (String uri: templateURIs) {
+                        try {
+                            Collection<Template> templates = TemplateReader.parseTemplates(uri, templatePath);
+                            //TODO: Ask user to choose the template
+                            Template chosenTemplate = templates.stream().iterator().next();
+                            frame.currTemplate = chosenTemplate;
+                            break;
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
                         }
-                        else {
-                            throw new UnsupportedOperationException("Support for opening a file with multiple templates not added yet. Please seperate the templates into seperate files.");
-                        }
-
-
                     }
-                    catch(Exception error) {
-                        System.out.println(error.getMessage());
-                    }
+
+                    ToCTeditor.gui = new ViewThread();
+                    ToCTeditor.gui.setCallTemplateItems(true);
+                    ToCTeditor.gui.start();
+
+//                    TemplateReader.Init(new ZuluFeatureParser());
+//                    TemplateReader.setTemplateOntologyNamespace(URIS.ToCT_NS);
+//                    TemplateReader.IS_DEBUG_ENABLED = true;
+//                    Template template;
+//                    try {
+//
+//                        Collection<String> templateURIs = TemplateReader.getTemplateURIs(templatePath);
+//                        if (templateURIs.size() == 1) {
+//                            templateURI = templateURIs.iterator().next();
+//
+//                            Collection<Template> templates = TemplateReader.parseTemplates(templateURI, templatePath);
+//                            if (templates.size() == 1) {
+//                                template = templates.iterator().next();
+//                                ToCTeditor.dataModel.setTemplate(template);
+//
+//                                ToCTeditor.gui = new ViewThread();
+//                                ToCTeditor.gui.setCallTemplateItems(true);
+//                                ToCTeditor.gui.start();
+//                                System.out.println(template.toString());
+//                            }
+//                            else if (templates.size() == 0) {
+//                                throw new UnsupportedOperationException("No template found in file.");
+//
+//                            }
+//                            else {
+//                                throw new UnsupportedOperationException("Support for opening a file with multiple templates not added yet. Please seperate the templates into seperate files.");
+//
+//                            }
+//
+//                        }
+//                        else {
+//                            throw new UnsupportedOperationException("Support for opening a file with multiple templates not added yet. Please seperate the templates into seperate files.");
+//                        }
+//                    }
+//                    catch(Exception error) {
+//                        System.out.println(error.getMessage());
+//                    }
 
                 }
                 /**String templateURI = "http://people.cs.uct.ac.za/~zmahlaza/templates/owlsiz/";
@@ -277,7 +286,8 @@ public class CreateTemplate {
         frame.setContentPane(pnlContent);
     }
 
+    @Deprecated
     private void updateTemplateName(String text) {
-        ToCTeditor.dataModel.getTemplate().setSerialisedName(text);
+        frame.currTemplate.setSerialisedName(text);
     }
 }

@@ -1,13 +1,4 @@
-/*
- * @(#) DataModel.java   1.0   Nov 18, 2021
- *
- * Sindiso Mkhatshwa (mkhsin035@myuct.ac.za)
- *
- * Nitschke Laboratory, UCT
- *
- * @(#) $Id$
- */
-
+import models.Part;
 import za.co.mahlaza.research.grammarengine.base.models.interfaces.InternalSlotRootAffix;
 import za.co.mahlaza.research.grammarengine.base.models.template.*;
 import za.co.mahlaza.research.grammarengine.base.models.template.Concord;
@@ -22,9 +13,7 @@ import za.co.mahlaza.research.grammarengine.base.models.template.UnimorphicAffix
 import za.co.mahlaza.research.grammarengine.base.models.template.UnimorphicWord;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 public class DataModel {
     private List<TemplatePortion> templatePortions;
@@ -109,7 +98,7 @@ public class DataModel {
     }
 
     public void addPart(TemplatePortion part){
-        String type = ToCTeditor.turtleGen.getPartType(part);
+        String type = part.getClass().getSimpleName();
         if (type.equals("Slot")){
             int i = parts.size();
             parts.add(new Part(((Slot)part).getIdentification()));
@@ -153,7 +142,7 @@ public class DataModel {
             }
             //System.out.println("Polymophic type: " + ((PolymorphicWord)part).getIdentification() + "Affix boxes: " + morphemes.size());
             for (InternalSlotRootAffix affix : morphemes) {
-                String affixType = ToCTeditor.turtleGen.getMorphemeType(affix);
+                String affixType = affix.getType();
                 if (affixType.equals("Concord")){
                     int j = parts.size();
                     parts.add(new Part(((Concord)affix).getIdentification()));
@@ -257,7 +246,7 @@ public class DataModel {
     public InternalSlotRootAffix findWordPortion(String updatedText) {
 
         for (TemplatePortion portion : templatePortions ){
-            String type = ToCTeditor.turtleGen.getPartType(portion);
+            String type = portion.getClass().getSimpleName();
             if ( type.equals("Polymorphic word")){
                 if (portion.equals(ToCTeditor.gui.getCurrentTemplatePortion())){
                     for (InternalSlotRootAffix word : ((PolymorphicWord)portion).getAllMorphemes() ){
