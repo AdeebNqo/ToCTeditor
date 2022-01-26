@@ -27,7 +27,7 @@ public class ViewThread extends Thread {
         this.callCreateMorpheme = false;
     }
 
-    public ViewThread(CreateTemplate homeScreen, TemplateItems templateItems, CreateItem createItem) {
+    public ViewThread(InitialCreateTemplateScreen homeScreen, MainTemplateViewScreen templateItems, CreateTemplateItemScreen createItem) {
         this.callCreateTemplate = false;
         this.callTemplateItems = false;
         this.callCreateItem = false;
@@ -71,8 +71,8 @@ public class ViewThread extends Thread {
         List<TemplatePortion> portions = ToCTeditorFrame.currTemplate.getTemplatePortions();
 
         if (portions.size() != 0) {
-            currentTemplatePortion = portions.get(index);
             for (int i=0; i<portions.size()-1; i++) {
+                currentTemplatePortion = portions.get(i);
                 TemplatePortion nextTemplatePortion = portions.get(i+1);
                 currentTemplatePortion.setNextPart(nextTemplatePortion);
             }
@@ -83,9 +83,8 @@ public class ViewThread extends Thread {
             callCreateTemplate = false;
         }
         else if (callTemplateItems) {
-            JPanel partEditorPanel = ToCTeditor.templateItems.getPartPanelEditor(currentTemplatePortion);
-            JPanel ttlPreviewPanel = ToCTeditor.templateItems.getPreviewPanel();
-            ToCTeditor.templateItems.setupGUI(partEditorPanel, ttlPreviewPanel);
+            JPanel partEditorPanel = ToCTeditor.templateItems.setupPartEditorPanelForTemplatePortion(currentTemplatePortion);
+            ToCTeditor.templateItems.setupGUI(partEditorPanel);
             callTemplateItems = false;
         }
         else if (callCreateItem) {
@@ -97,12 +96,9 @@ public class ViewThread extends Thread {
             callCreateItem = false;
         }
         else if (ToCTeditor.toggleBtnState != ToCTeditor.prevToggleBtnState) {
-            JPanel partEditorPanel = ToCTeditor.templateItems.getPartPanelEditor(currentTemplatePortion);
-            JPanel ttlPreviewPanel = ToCTeditor.templateItems.getPreviewPanel();
-            ToCTeditor.templateItems.updateEditorTurtlePanel(partEditorPanel, ttlPreviewPanel);
+            JPanel ttlPreviewPanel = ToCTeditor.templateItems.setupPreviewPanel();
+            ToCTeditor.templateItems.updateEditorTurtlePanel(ttlPreviewPanel);
             ToCTeditor.prevToggleBtnState = ToCTeditor.toggleBtnState;
         }
-
-        System.out.println("ViewThread. Current template = "+ToCTeditorFrame.currTemplate.getSerialisedName()+" Size = "+ToCTeditorFrame.currTemplate.getTemplatePortions().size());
     }
 }

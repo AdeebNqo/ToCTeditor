@@ -16,9 +16,9 @@ public class ToCTeditor {
     //static TurtleCode turtleGen;
 
     static ToCTeditorFrame frame;
-    static CreateTemplate homeScreen;
-    static TemplateItems templateItems;
-    static CreateItem createItem;
+    static InitialCreateTemplateScreen homeScreen;
+    static MainTemplateViewScreen templateItems;
+    static CreateTemplateItemScreen createItem;
     static CreateMorpheme createMorpheme;
 
     static int prevToggleBtnState;
@@ -31,9 +31,9 @@ public class ToCTeditor {
         prevToggleBtnState = 1;
 
         frame = new ToCTeditorFrame(1000, 600);
-        homeScreen = new CreateTemplate(frame);
-        templateItems = new TemplateItems(frame);
-        createItem = new CreateItem(frame);
+        homeScreen = new InitialCreateTemplateScreen(frame);
+        templateItems = new MainTemplateViewScreen(frame);
+        createItem = new CreateTemplateItemScreen(frame);
         createMorpheme = new CreateMorpheme(frame);
 
         //turtleGen = new TurtleCode();

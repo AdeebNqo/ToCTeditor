@@ -44,15 +44,8 @@ public class DragMouseAdapter extends MouseAdapter {
         ToCTeditor.gui.setIndex(index);
         if (index >= 0) {
             TemplatePortion currentPortion = ToCTeditorFrame.currTemplate.getPortionAt(index);
-
-            if (editorPanel == null) {
-                editorPanel = ToCTeditor.templateItems.getPartPanelEditor(currentPortion);
-                ToCTeditor.templateItems.updateEditorPanel(editorPanel);
-            }
-            if (previewPanel == null) {
-                previewPanel = ToCTeditor.templateItems.getPreviewPanel();
-                ToCTeditor.templateItems.updateTurtlePanel(previewPanel);
-            }
+            System.out.println("Responding to mouse clcik");
+            ToCTeditor.templateItems.onClick(currentPortion);
         }
     }
 
@@ -118,7 +111,7 @@ public class DragMouseAdapter extends MouseAdapter {
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        Point pt = e.getPoint();
+/*        Point pt = e.getPoint();
         JComponent parent = (JComponent) e.getComponent();
 
         //MotionThreshold
@@ -153,7 +146,7 @@ public class DragMouseAdapter extends MouseAdapter {
             }
         }
         parent.remove(gap);
-        parent.revalidate();
+        parent.revalidate();*/
     }
 
     @Override
