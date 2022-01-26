@@ -16,13 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CreateMorpheme {
+
     private int frameX;
     private int frameY;
     private ToCTeditorFrame frame;
-
     List<InternalSlotRootAffix> wordPortions;
     List<Feature> featuresList;
-
 
     /**
      * Existing Item panel
@@ -33,12 +32,9 @@ public class CreateMorpheme {
         this.frameX = frame.getFrameX();
         this.frameY = frame.getFrameY();
         this.frame = frame;
-
-
     }
 
     public void setupGUI(TemplatePortion templatePortion){
-
         // Frame init and dimensions
         JPanel g = new JPanel();
         g.setLayout(new BoxLayout(g, BoxLayout.PAGE_AXIS));
@@ -54,7 +50,6 @@ public class CreateMorpheme {
         /**
          * Title panel
          */
-
         JPanel pnlItemsTitle = new JPanel();
         pnlItemsTitle.setLayout(new BoxLayout(pnlItemsTitle, BoxLayout.LINE_AXIS));
         pnlItemsTitle.setMaximumSize(new Dimension(700,15));
@@ -80,7 +75,6 @@ public class CreateMorpheme {
         lblExistingItemTitle.setMaximumSize(new Dimension(345,15));
 
 
-
         /**
          * Add title labels to labels panel
          */
@@ -97,10 +91,6 @@ public class CreateMorpheme {
         pnlExistingItem.setAlignmentX(Component.CENTER_ALIGNMENT);
         pnlExistingItem.setBackground(Color.lightGray);
         pnlExistingItem.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
-
-        //pnlExistingItem.add(setupExistingItems(ToCTeditor.dataModel.getData()));
-        //pnlExistingItem.add(setupExistingItems(ToCTeditor.dataModel.getTemplatePortions()));
-        //List<InternalSlotRootAffix> wordPortions = new ArrayList<>();
 
         if (templatePortion != null) {
             if (((PolymorphicWord) templatePortion).getAllMorphemes().size() > 0) {
@@ -495,6 +485,7 @@ public class CreateMorpheme {
         p.add(pnlScroll);
         return p;
     }
+
     public JComponent setupSearchField(){
         JPanel pnlSearchField = new JPanel();
         pnlSearchField.setLayout(new BoxLayout(pnlSearchField, BoxLayout.LINE_AXIS));

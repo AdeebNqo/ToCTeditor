@@ -1,29 +1,23 @@
 import models.Part;
 import za.co.mahlaza.research.grammarengine.base.models.template.TemplatePortion;
-
 import javax.swing.*;
-
+import java.util.List;
 /*
  * @(#) ViewThread.java   1.0   Nov 18, 2021
  *
  * Sindiso Mkhatshwa (mkhsin035@myuct.ac.za)
+ * Zola Mahlaza
  *
  * @(#) $Id$
  */
 public class ViewThread extends Thread {
-    //private CreateTemplate homeScreen;
-    //TemplateItems templateItems;
-    //private CreateItem createItem;
-    //private DataModel dataModel;
 
     boolean callCreateTemplate;
     boolean callTemplateItems;
     boolean callCreateItem;
     boolean callCreateMorpheme;
-
     private Part currentPart;
     private TemplatePortion currentTemplatePortion;
-
     private int index;
 
     public ViewThread() {
@@ -33,7 +27,7 @@ public class ViewThread extends Thread {
         this.callCreateMorpheme = false;
     }
 
-    public ViewThread(CreateTemplate homeScreen, TemplateItems templateItems, CreateItem createItem, DataModel datamodel) {
+    public ViewThread(CreateTemplate homeScreen, TemplateItems templateItems, CreateItem createItem) {
         this.callCreateTemplate = false;
         this.callTemplateItems = false;
         this.callCreateItem = false;
@@ -56,18 +50,6 @@ public class ViewThread extends Thread {
         this.index = index;
     }
 
-    public Part getCurrentPart() {
-        currentPart = ToCTeditor.dataModel.getPart(index);
-        return currentPart;
-    }
-
-
-    public TemplatePortion getCurrentTemplatePortion(){
-        currentTemplatePortion = ToCTeditor.dataModel.getTemplatePortion(index);
-        return currentTemplatePortion;
-    }
-
-
     public void setCallCreateTemplate(boolean callCreateTemplate) {
         this.callCreateTemplate = callCreateTemplate;
     }
@@ -79,20 +61,30 @@ public class ViewThread extends Thread {
     public void setCallCreateItem(boolean callCreateItem) {
         this.callCreateItem = callCreateItem;
     }
+
     public void setCallCreateMorpheme(boolean callCreateMorpheme) {
         this.callCreateMorpheme = callCreateMorpheme;
     }
 
     @Override
     public void run() {
-        currentTemplatePortion = ToCTeditor.dataModel.getTemplatePortion(index);
+        List<TemplatePortion> portions = ToCTeditorFrame.currTemplate.getTemplatePortions();
+
+        if (portions.size() != 0) {
+            currentTemplatePortion = portions.get(index);
+            for (int i=0; i<portions.size()-1; i++) {
+                TemplatePortion nextTemplatePortion = portions.get(i+1);
+                currentTemplatePortion.setNextPart(nextTemplatePortion);
+            }
+        }
+
         if (callCreateTemplate) {
             ToCTeditor.homeScreen.setupGUI();
             callCreateTemplate = false;
         }
         else if (callTemplateItems) {
             JPanel partEditorPanel = ToCTeditor.templateItems.getPartPanelEditor(currentTemplatePortion);
-            JPanel ttlPreviewPanel = ToCTeditor.templateItems.getPartPanelTurtle();
+            JPanel ttlPreviewPanel = ToCTeditor.templateItems.getPreviewPanel();
             ToCTeditor.templateItems.setupGUI(partEditorPanel, ttlPreviewPanel);
             callTemplateItems = false;
         }
@@ -106,9 +98,11 @@ public class ViewThread extends Thread {
         }
         else if (ToCTeditor.toggleBtnState != ToCTeditor.prevToggleBtnState) {
             JPanel partEditorPanel = ToCTeditor.templateItems.getPartPanelEditor(currentTemplatePortion);
-            JPanel ttlPreviewPanel = ToCTeditor.templateItems.getPartPanelTurtle();
+            JPanel ttlPreviewPanel = ToCTeditor.templateItems.getPreviewPanel();
             ToCTeditor.templateItems.updateEditorTurtlePanel(partEditorPanel, ttlPreviewPanel);
             ToCTeditor.prevToggleBtnState = ToCTeditor.toggleBtnState;
         }
+
+        System.out.println("ViewThread. Current template = "+ToCTeditorFrame.currTemplate.getSerialisedName()+" Size = "+ToCTeditorFrame.currTemplate.getTemplatePortions().size());
     }
 }

@@ -20,7 +20,8 @@ public class DragMouseAdapter extends MouseAdapter {
     private Point dragOffset;
     private final int gestureMotionThreshold = DragSource.getDragThreshold();
 
-    //ControlThread controlThread;
+    JPanel editorPanel = null;
+    JPanel previewPanel = null;
 
     public DragMouseAdapter(/**ControlThread controller*/) {
         super();
@@ -28,12 +29,9 @@ public class DragMouseAdapter extends MouseAdapter {
         window.setBackground(new Color(0, true));
     }
 
-    @Override public void mousePressed(MouseEvent e) {
-        System.out.println("mousePressed called");
-
+    @Override
+    public void mousePressed(MouseEvent e) {
         JComponent parent = (JComponent) e.getComponent();
-        System.out.println("Parent = "+parent);
-        System.out.println("Parent size = "+parent.getComponentCount());
         if (parent.getComponentCount() < 1) {
             startPt = null;
             return;
@@ -43,19 +41,19 @@ public class DragMouseAdapter extends MouseAdapter {
         Component c = parent.getComponentAt(startPt);
         index = parent.getComponentZOrder(c);
 
-        System.out.println(ToCTeditor.gui.getIndex()+" --- "+index);
-        //if (ToCTeditor.gui.getIndex() != index) {
-            ToCTeditor.gui.setIndex(index);
+        ToCTeditor.gui.setIndex(index);
+        if (index >= 0) {
             TemplatePortion currentPortion = ToCTeditorFrame.currTemplate.getPortionAt(index);
-            JPanel editorPanel;
-            JPanel previewPanel;
 
-            editorPanel = ToCTeditor.templateItems.getPartPanelEditor(currentPortion);
-            previewPanel = ToCTeditor.templateItems.getPartPanelTurtle();
-
-            ToCTeditor.templateItems.updateEditorPanel(editorPanel);
-            ToCTeditor.templateItems.updateTurtlePanel(previewPanel);
-        //}
+            if (editorPanel == null) {
+                editorPanel = ToCTeditor.templateItems.getPartPanelEditor(currentPortion);
+                ToCTeditor.templateItems.updateEditorPanel(editorPanel);
+            }
+            if (previewPanel == null) {
+                previewPanel = ToCTeditor.templateItems.getPreviewPanel();
+                ToCTeditor.templateItems.updateTurtlePanel(previewPanel);
+            }
+        }
     }
 
     private void startDragging(JComponent parent, Point pt) {
@@ -102,6 +100,7 @@ public class DragMouseAdapter extends MouseAdapter {
         }
         return -1;
     }
+
     private static void swapComponentLocation(
             Container parent, Component remove, Component add, int idx) {
         parent.remove(remove);
@@ -111,13 +110,14 @@ public class DragMouseAdapter extends MouseAdapter {
     }
 
     private static void updateList( int startIndex, int stopIndex ) {
-        TemplatePortion templatePortion = ToCTeditor.dataModel.getTemplatePortion(startIndex);
-        ToCTeditor.dataModel.removeTemplatePortion(startIndex);
-        ToCTeditor.dataModel.addTemplatePortion(stopIndex, templatePortion);
-
+        //TODO: fix the following three lines
+//        TemplatePortion templatePortion = ToCTeditor.dataModel.getTemplatePortion(startIndex);
+//        ToCTeditor.dataModel.removeTemplatePortion(startIndex);
+//        ToCTeditor.dataModel.addTemplatePortion(stopIndex, templatePortion);
     }
 
-    @Override public void mouseDragged(MouseEvent e) {
+    @Override
+    public void mouseDragged(MouseEvent e) {
         Point pt = e.getPoint();
         JComponent parent = (JComponent) e.getComponent();
 
@@ -156,45 +156,47 @@ public class DragMouseAdapter extends MouseAdapter {
         parent.revalidate();
     }
 
-    @Override public void mouseReleased(MouseEvent e) {
-        startPt = null;
-        if (!window.isVisible() || draggingComonent == null) {
-            return;
-        }
-        Point pt = e.getPoint();
-        JComponent parent = (JComponent) e.getComponent();
-
-        //close the cursor window
-        Component cmp = draggingComonent;
-        draggingComonent = null;
-        prevRect = null;
-        startPt = null;
-        dragOffset = null;
-        window.setVisible(false);
-
-        //swap the dragging panel and the dummy filler
-        for (int i = 0; i < parent.getComponentCount(); i++) {
-            Component c = parent.getComponent(i);
-            if (Objects.equals(c, gap)) {
-                updateList(index, i);
-                ToCTeditor.dataModel.updateNextPart();
-                swapComponentLocation(parent, gap, cmp, i);
-                return;
-            }
-            int tgt = getTargetIndex(c.getBounds(), pt, i);
-            if (tgt >= 0) {
-                updateList(index, i);
-                ToCTeditor.dataModel.updateNextPart();
-                swapComponentLocation(parent, gap, cmp, tgt);
-                return;
-            }
-        }
-        if (parent.getParent().getBounds().contains(pt)) {
-            updateList(index, parent.getComponentCount());
-            ToCTeditor.dataModel.updateNextPart();
-            swapComponentLocation(parent, gap, cmp, parent.getComponentCount());
-        } else {
-            swapComponentLocation(parent, gap, cmp, index);
-        }
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        //TODO: Fix the the entire method
+//        startPt = null;
+//        if (!window.isVisible() || draggingComonent == null) {
+//            return;
+//        }
+//        Point pt = e.getPoint();
+//        JComponent parent = (JComponent) e.getComponent();
+//
+//        //close the cursor window
+//        Component cmp = draggingComonent;
+//        draggingComonent = null;
+//        prevRect = null;
+//        startPt = null;
+//        dragOffset = null;
+//        window.setVisible(false);
+//
+//        //swap the dragging panel and the dummy filler
+//        for (int i = 0; i < parent.getComponentCount(); i++) {
+//            Component c = parent.getComponent(i);
+//            if (Objects.equals(c, gap)) {
+//                updateList(index, i);
+//                ToCTeditor.dataModel.updateNextPart();
+//                swapComponentLocation(parent, gap, cmp, i);
+//                return;
+//            }
+//            int tgt = getTargetIndex(c.getBounds(), pt, i);
+//            if (tgt >= 0) {
+//                updateList(index, i);
+//                ToCTeditor.dataModel.updateNextPart();
+//                swapComponentLocation(parent, gap, cmp, tgt);
+//                return;
+//            }
+//        }
+//        if (parent.getParent().getBounds().contains(pt)) {
+//            updateList(index, parent.getComponentCount());
+//            ToCTeditor.dataModel.updateNextPart();
+//            swapComponentLocation(parent, gap, cmp, parent.getComponentCount());
+//        } else {
+//            swapComponentLocation(parent, gap, cmp, index);
+//        }
     }
 }

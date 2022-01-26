@@ -270,7 +270,7 @@ public class CreateItem {
     }
 
     public void viewCurrentTemplate() {
-        ToCTeditor.gui = new ViewThread(ToCTeditor.homeScreen, ToCTeditor.templateItems, ToCTeditor.createItem, ToCTeditor.dataModel);
+        ToCTeditor.gui = new ViewThread(ToCTeditor.homeScreen, ToCTeditor.templateItems, ToCTeditor.createItem);
         ToCTeditor.gui.setCallTemplateItems(true);
         ToCTeditor.gui.setIndex(frame.currTemplate.getTemplatePortions().size()-1);
         ToCTeditor.gui.start();

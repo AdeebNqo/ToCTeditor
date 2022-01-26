@@ -4,7 +4,6 @@ import javax.swing.*;
 
 public class ToCTeditorFrame extends JFrame {
 
-    public String currTemplateName;
     public static Template currTemplate;
 
     private int frameX;

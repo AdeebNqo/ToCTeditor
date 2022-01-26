@@ -1,14 +1,9 @@
-import za.co.mahlaza.research.grammarengine.base.models.template.Template;
-import za.co.mahlaza.research.grammarengine.nguni.zu.ZuluFeatureParser;
-import za.co.mahlaza.research.templateparsing.TemplateReader;
-import za.co.mahlaza.research.templateparsing.URIS;
 
 /*
  * @(#) ToCTeditor.java   1.0   Nov 10, 2021
  *
  * Sindiso Mkhatshwa (mkhsin035@myuct.ac.za)
- *
- * Nitschke Laboratory, UCT
+ * Zola Mahlaza
  *
  * @(#) $Id$
  */
@@ -16,7 +11,7 @@ public class ToCTeditor {
 
     static boolean DEBUG = true;
     static ViewThread gui;
-    static DataModel dataModel;
+    //static DataModel dataModel;
 
     //static TurtleCode turtleGen;
 
@@ -42,7 +37,7 @@ public class ToCTeditor {
         createMorpheme = new CreateMorpheme(frame);
 
         //turtleGen = new TurtleCode();
-        dataModel = new DataModel();
+        //dataModel = new DataModel();
 
         homeScreen.setupGUI();
     }

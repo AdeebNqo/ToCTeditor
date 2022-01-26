@@ -1,10 +1,7 @@
 import za.co.mahlaza.research.grammarengine.base.models.mola.Languoid;
 import za.co.mahlaza.research.grammarengine.base.models.template.Template;
 import za.co.mahlaza.research.grammarengine.base.models.template.TemplatePortion;
-import za.co.mahlaza.research.grammarengine.nguni.zu.ZuluFeatureParser;
 import za.co.mahlaza.research.templateparsing.TemplateReader;
-import za.co.mahlaza.research.templateparsing.URIS;
-
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -19,13 +16,10 @@ public class CreateTemplate {
     private int frameY;
     private ToCTeditorFrame frame;
 
-    //private ControlThread controlThread;
     CreateTemplate(ToCTeditorFrame frame/**, ControlThread controlThread*/){
         this.frameX = frame.getFrameX();
         this.frameY = frame.getFrameX();
         this.frame = frame;
-
-        //this.controlThread = controlThread;
     }
 
     public void setupGUI() {
@@ -189,7 +183,6 @@ public class CreateTemplate {
         btnOpen.setFont(new Font("Sans", Font.PLAIN, 15));
         btnOpen.setMaximumSize(new Dimension(400,30));
 
-
         /**
          * Add the listener to the JButton to handle the "pressed" event
          */
@@ -224,56 +217,7 @@ public class CreateTemplate {
                     ToCTeditor.gui = new ViewThread();
                     ToCTeditor.gui.setCallTemplateItems(true);
                     ToCTeditor.gui.start();
-
-//                    TemplateReader.Init(new ZuluFeatureParser());
-//                    TemplateReader.setTemplateOntologyNamespace(URIS.ToCT_NS);
-//                    TemplateReader.IS_DEBUG_ENABLED = true;
-//                    Template template;
-//                    try {
-//
-//                        Collection<String> templateURIs = TemplateReader.getTemplateURIs(templatePath);
-//                        if (templateURIs.size() == 1) {
-//                            templateURI = templateURIs.iterator().next();
-//
-//                            Collection<Template> templates = TemplateReader.parseTemplates(templateURI, templatePath);
-//                            if (templates.size() == 1) {
-//                                template = templates.iterator().next();
-//                                ToCTeditor.dataModel.setTemplate(template);
-//
-//                                ToCTeditor.gui = new ViewThread();
-//                                ToCTeditor.gui.setCallTemplateItems(true);
-//                                ToCTeditor.gui.start();
-//                                System.out.println(template.toString());
-//                            }
-//                            else if (templates.size() == 0) {
-//                                throw new UnsupportedOperationException("No template found in file.");
-//
-//                            }
-//                            else {
-//                                throw new UnsupportedOperationException("Support for opening a file with multiple templates not added yet. Please seperate the templates into seperate files.");
-//
-//                            }
-//
-//                        }
-//                        else {
-//                            throw new UnsupportedOperationException("Support for opening a file with multiple templates not added yet. Please seperate the templates into seperate files.");
-//                        }
-//                    }
-//                    catch(Exception error) {
-//                        System.out.println(error.getMessage());
-//                    }
-
                 }
-                /**String templateURI = "http://people.cs.uct.ac.za/~zmahlaza/templates/owlsiz/";
-                String templatePath = "/home/root07/Documents/Academics/Templates/template1.1.ttl";
-                String templateName = "templ1.1";
-                System.out.println("Name:" + templateName + " Path: " + templatePath);
-
-                TemplateReader.Init(new ZuluFeatureParser());
-                TemplateReader.setTemplateOntologyNamespace(URIS.ToCT_NS);
-                TemplateReader.IS_DEBUG_ENABLED = true;
-                Template template = TemplateReader.parseTemplate(templateName, templateURI, templatePath);
-                System.out.println("Template parsed.");*/
             }
         });
 
@@ -282,12 +226,6 @@ public class CreateTemplate {
         pnlOpenTemplate.add(Box.createRigidArea(new Dimension(0,10)));
         pnlContent.add(pnlOpenTemplate);
 
-
         frame.setContentPane(pnlContent);
-    }
-
-    @Deprecated
-    private void updateTemplateName(String text) {
-        frame.currTemplate.setSerialisedName(text);
     }
 }
