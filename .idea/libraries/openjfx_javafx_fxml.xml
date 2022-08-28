@@ -1,0 +1,17 @@
+<component name="libraryTable">
+  <library name="openjfx.javafx.fxml" type="repository">
+    <properties maven-id="org.openjfx:javafx-fxml:13" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/javafx-fxml-13.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javafx-fxml-13-linux.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javafx-controls-13.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javafx-controls-13-linux.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javafx-graphics-13.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javafx-graphics-13-linux.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javafx-base-13.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javafx-base-13-linux.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<Accordion maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="500.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="za.co.mahlaza.research.tocteditor.ui.controllers.CreateOrOpenTemplateController">
+  <panes>
+    <TitledPane animated="false" text="Create new template">
+         <content>
+            <AnchorPane prefHeight="200.0" prefWidth="200.0">
+               <children>
+                  <TextField layoutX="50.0" layoutY="76.0" promptText="Template name" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" />
+                  <ChoiceBox layoutX="51.0" layoutY="134.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" />
+                  <Button layoutX="167.0" layoutY="217.0" mnemonicParsing="false" text="Create" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" />
+               </children>
+            </AnchorPane>
+         </content>
+    </TitledPane>
+    <TitledPane animated="false" text="Open existing template">
+      <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <Button id="chooseTemplateFileBtn" layoutX="218.0" layoutY="198.0" mnemonicParsing="false" text="Choose template file" AnchorPane.bottomAnchor="200.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" AnchorPane.topAnchor="200.0" onAction="#onChooseTemplateFile" />
+               </children></AnchorPane>
+      </content>
+    </TitledPane>
+  </panes>
+</Accordion>

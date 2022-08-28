@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.web.*?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="za.co.mahlaza.research.tocteditor.ui.controllers.ShowOrPreviewTemplateController">
+   <children>
+      <WebView layoutX="157.0" layoutY="21.0" minHeight="-1.0" minWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="250.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="70.0" />
+      <Label layoutX="50.0" layoutY="35.0" text="Template items" />
+      <HBox layoutX="52.0" layoutY="169.0" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="160.0" />
+      <AnchorPane layoutX="50.0" layoutY="350.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0">
+         <children>
+            <Button id="backBtn" layoutX="250.0" layoutY="1.0" mnemonicParsing="false" onAction="#onBack" text="Back" AnchorPane.leftAnchor="250.0" />
+            <Button id="addTemplateItemsBtn" mnemonicParsing="false" onAction="#onAddTemplateItem" text="Add template item" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" />
+            <Button id="saveBtn" layoutX="172.0" layoutY="1.0" mnemonicParsing="false" onAction="#onTemplateSave" text="Save" />
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>
